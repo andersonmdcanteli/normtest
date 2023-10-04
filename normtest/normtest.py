@@ -47,8 +47,13 @@ from .utils import constants
 
 
 ##### CLASS #####
-
-
+# rj_critical_value(n, alpha=0.05)
+# ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False)
+# rj_correlation_plot(axes, x_data, method="blom", weighted=False)
+# rj_dist_plot(axes, x_data, method="blom", min=4, max=50, deleted=False, weighted=False)
+# rj_dist_plot(axes, x_data, method="blom", min=4, max=50, deleted=False, weighted=False)
+# rj_p_value(statistic, n)
+# ordered_statistics(n, method)
 ##### FUNCTIONS #####
 
 
@@ -544,3 +549,73 @@ def ordered_statistics(n, method):
   
     return mi
     
+
+def normal_distribution_plot(axes, n_rep, seed=None, xinfo=[0.00001, 0.99999, 1000], loc=0.0, scale=1.0, safe=False):
+    """This function draws a normal distribution chart with the experimental points and the distribution histogram
+
+    Parameters
+    ----------
+    axes : ``matplotlib.axes.SubplotBase``
+        The axes to plot    
+    n_rep : ``int`` (positive)
+        The number of samples in the dataset (must be greater than 3)
+    seed : ``int`` (optional)
+        The seed used to obtain random data from the Normal distribution. The default value is ``None`` which results in a random seed
+    xinfo : ``list`` (optional)
+        A list with three elements:
+        * ``xinfo[0]`` the smallest value used as Percent point (positive, default is ``10-6``);
+        * ``xinfo[1]`` the highest value used as Percent point (positive, default is ``1-10-6``);;
+        * ``xinfo[2]`` the number of equally spaced points that are generated to estimate the Normal distribution (positive, default is ``1000``);;
+    loc : ``float`` or ``int`` (optional)
+        The loc parameter of the Normal distribution (default is ``0.0``)
+    scale : ``float`` or ``int`` (optional)
+        The scale parameter of the Normal distribution (positive, default is ``1.0``)
+    safe : ``bool`` (optional)
+        Whether to check the inputs before performing the calculations (``True``) or not (``False``, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).
+
+    Returns
+    -------        
+    axes : ``matplotlib.axes._subplots.AxesSubplot``
+        The axis of the graph.
+
+    See Also
+    --------        
+    
+    
+    Examples
+    --------
+        
+    """
+    constants.warning_plot()
+    if safe:
+        checkers._check_is_subplots(axes, "axes")
+        if seed is not None:
+            checkers._check_is_integer(seed, "seed")
+            checkers._check_is_positive(seed, "seed")
+        checkers._check_is_integer(n_rep, "n_rep")
+        checkers._check_value_is_equal_or_higher_than(n_rep, "n_rep", 4)
+        checkers._check_is_list(xinfo, "xinfo")
+        checkers._check_list_size(xinfo, "xinfo", 3)
+        checkers._check_is_float_or_int(xinfo[0], "xinfo[0]")
+        checkers._check_data_in_range(xinfo[0], "xinfo[0]", 1e-6, 1-1e-6)
+        checkers._check_data_in_range(xinfo[1], "xinfo[1]", 1e-6, 1-1e-6)
+        checkers._check_is_integer(xinfo[2], "xinfo[2]")
+        checkers._check_is_positive(xinfo[2], "xinfo[2]")
+        checkers._check_is_float_or_int(loc, "loc")
+        checkers._check_is_float_or_int(scale, "scale")
+        checkers._check_is_positive(scale, "scale")
+        
+    x = np.linspace(stats.norm.ppf(xinfo[0]), stats.norm.ppf(xinfo[1]), xinfo[2])
+    axes.plot(x, stats.norm.pdf(x), ls='--', c="gray", label='Theoretical')
+    rng = np.random.default_rng(seed)
+    normal_data = rng.normal(loc=loc, scale=scale, size=n_rep)
+    axes.scatter(normal_data, stats.norm.pdf(normal_data), color="r", alpha=.6, label=f'Seed = {seed}')
+    axes.hist(normal_data, density=True, alpha=0.5, color="skyblue")
+    axes.text(0.025, 0.95, f"kurtosis={round(stats.kurtosis(normal_data) + 3, 3)}", 
+            horizontalalignment='left', verticalalignment='center', transform=axes.transAxes)
+    axes.text(0.025, 0.85, f"skew={round(stats.skew(normal_data), 3)}", 
+            horizontalalignment='left', verticalalignment='center', transform=axes.transAxes)
+    axes.set_title(f"Seed = {seed}")
+
+
+    return axes
