@@ -38,6 +38,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from scipy import stats
 from scipy import interpolate
+import seaborn as sns
 
 ### home made ###
 from .utils import checkers
@@ -47,6 +48,8 @@ from .utils import constants
 
 
 ##### CLASS #####
+
+##### FUNCTIONS #####
 # rj_critical_value(n, alpha=0.05)
 # ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False)
 # rj_correlation_plot(axes, x_data, method="blom", weighted=False)
@@ -54,8 +57,7 @@ from .utils import constants
 # rj_dist_plot(axes, x_data, method="blom", min=4, max=50, deleted=False, weighted=False)
 # rj_p_value(statistic, n)
 # ordered_statistics(n, method)
-##### FUNCTIONS #####
-
+# normal_distribution_plot(axes, n_rep, seed=None, xinfo=[0.00001, 0.99999, 1000], loc=0.0, scale=1.0, safe=False)
 
 
 
@@ -550,6 +552,7 @@ def ordered_statistics(n, method):
     return mi
     
 
+
 # com alguns testes
 def normal_distribution_plot(axes, n_rep, seed=None, xinfo=[0.00001, 0.99999, 1000], loc=0.0, scale=1.0, safe=False):
     """This function draws a normal distribution chart with the experimental points and the distribution histogram
@@ -587,7 +590,7 @@ def normal_distribution_plot(axes, n_rep, seed=None, xinfo=[0.00001, 0.99999, 10
     --------
         
     """
-    constants.warning_plot()
+    
     if safe:
         checkers._check_is_subplots(axes, "axes")
         if seed is not None:
@@ -605,7 +608,8 @@ def normal_distribution_plot(axes, n_rep, seed=None, xinfo=[0.00001, 0.99999, 10
         checkers._check_is_float_or_int(loc, "loc")
         checkers._check_is_float_or_int(scale, "scale")
         checkers._check_is_positive(scale, "scale")
-        
+    
+    constants.warning_plot()
     x = np.linspace(stats.norm.ppf(xinfo[0]), stats.norm.ppf(xinfo[1]), xinfo[2])
     axes.plot(x, stats.norm.pdf(x), ls='--', c="gray", label='Theoretical')
     rng = np.random.default_rng(seed)
@@ -620,3 +624,128 @@ def normal_distribution_plot(axes, n_rep, seed=None, xinfo=[0.00001, 0.99999, 10
 
 
     return axes
+
+
+# com alguns testes
+def make_heatmap(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, tests_column_names=None, normal=True, safe=False):
+    """This function draws a heat map of the results obtained with normality tests
+    
+    Parameters
+    ----------
+    axes : ``matplotlib.axes.SubplotBase``
+        The axes to plot    
+    df : ``pandas.dataframe``
+        A dataframe with at least three columns containing the adopted significance level, the sample size and the result of at least one test. Columns with results must contain only ``bool`` values.
+    n_samples : ``int``
+        The number of sets used in the tests
+    alpha_column_name : ``str`` (optional)
+        The name of the column containing the significance levels adopted for each execution. If ``None``, the name of the first column of the ``df`` is assigned to this parameter.
+    n_rep_name : ``str`` (optional)
+        The name of the column containing the size of the sample used for each execution. If ``None``, the name of the second column of the ``df`` is assigned to this parameter.   
+    tests_column_names : ``list`` of ``str`` (optional)
+        A ``list`` containing the names of the columns with the results of each test. If ``None``, the names of all columns in the ``df`` are assigned to this parameter, with the exception of the first two columns
+    normal : ``bool`` (optional)
+        Whether to consider the data truly coming from the Normal distribution (``True``, default) or not (``False``). 
+        * If ``True``, columns containing test results will have ``True`` values replaced by ``1`` and ``False`` values replaced by ``0``;
+        * If ``False``, columns containing test results will have ``True`` values replaced by ``0`` and ``False`` values replaced by ``1``;
+    safe : ``bool`` (optional)
+        Whether to check the inputs before performing the calculations (``True``) or not (``False``, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).
+
+    Returns
+    -------        
+    axes : ``matplotlib.axes._subplots.AxesSubplot``
+        The axis of the graph.
+    df : ``pandas.DataFrame``
+        The modified ``df`` with the estimated probabilities for the tests used to draw the heatmap        
+
+    Notes
+    -----
+    If ``alpha_column_name`` or ``n_rep_name`` or ``tests_column_names`` are None, they are all interpreted as ``None``.
+
+
+        
+    See Also
+    --------            
+    """
+
+    if alpha_column_name is None or n_rep_name is None or tests_column_names is None:
+        alpha_column_name = df.columns[0]
+        n_rep_name = df.columns[1]
+        tests_column_names = df.columns[2:]
+    else:
+        if safe:
+            checkers._check_is_subplots(axes, "axes")
+            checkers._check_is_data_frame(df, "df")
+            if df.shape[0] < 3:
+                try:
+                    raise ValueError("Missing columns error")
+                except ValueError:
+                    print(f"\n\nThe data frame 'df' must contain at least 3 columns, but it only contains {df.shape[0]}.\n\n")
+                    raise            
+            checkers._check_is_integer(n_samples, "n_samples")
+            checkers._check_value_is_equal_or_higher_than(n_samples, "n_samples", 2)
+            checkers._check_is_str(alpha_column_name, "alpha_column_name")
+            checkers._check_is_str(n_rep_name, "n_rep_name")
+            checkers._check_is_list(tests_column_names, "tests_column_names")
+            for i in range(len(tests_column_names)):
+                checkers._check_is_str(tests_column_names[i], f"tests_column_names[{i}]")
+            checkers._check_is_bool(normal, "normal")
+            for test in (tests_column_names):
+                if df[tests_column_names].dtype != bool:
+                    try:
+                        raise ValueError("Not boolean error")
+                    except ValueError:
+                        print(f"\n\nThe Column '{test}' must contain only boolean values.\n\n")
+                        raise
+    constants.warning_plot()
+    df = df.copy()
+    if normal:
+        true = 1
+        false = 0
+    else:
+        true = 0
+        false = 1
+
+    # replacing true and false to zero and ones
+    for test in tests_column_names:
+        df[test] = df[test].replace({True: true, False: false})
+
+    # finding unique alpha values
+    alphas = df[alpha_column_name].unique()
+    
+
+    # splitting df into dfs based on alpha
+    dfs = []
+    for alpha in alphas:
+        dfs.append(
+                df[df[alpha_column_name] == alpha]
+        )
+    # dropping alpha column
+    for i in range(len(dfs)):
+        dfs[i] = dfs[i].drop(alpha_column_name, axis=1)
+    
+    # renaming coluns to add alpha info
+    for i in range(len(dfs)):
+        new_names = []
+        for test in tests_column_names:
+            new_names.append(test + f" ({round(100*float(alphas[i]))}%)")        
+        dfs[i] = dfs[i].rename(columns=dict(zip(dfs[i].columns[1:], new_names)))   
+        
+    # grouping
+    for i in range(len(dfs)):
+        dfs[i] = dfs[i][
+            dfs[i].columns[1:]
+        ].groupby(dfs[i][dfs[i].columns[0]]).agg("sum")
+
+    # concatting     
+    df = pd.concat(dfs, axis='columns')
+
+    # percentages
+    df = df*100/n_samples
+    
+    # heatmap
+    axes = sns.heatmap(df.transpose(), annot=True, ax=axes, fmt=".1f", cmap=sns.color_palette("flare", as_cmap=True), 
+                     vmin=0, vmax=100, annot_kws={"fontsize":10},
+                     cbar_kws={"pad":0.02}
+                     )
+    return axes, df

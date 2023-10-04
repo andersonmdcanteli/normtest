@@ -5,7 +5,7 @@
 
 # from third parties
 import numpy as np
-# import pandas as pd
+import pandas as pd
 from matplotlib.axes import SubplotBase
 # self made
 
@@ -300,38 +300,38 @@ def _check_value_is_equal_or_higher_than(value, param_name, minimum):
             raise
     return True
 
-# def _check_is_data_frame(df, param_name,):
-#     """This function checks if ``df`` is a valid ``DataFrame``, e.g., if it is ``DataFrame`` and if it is not empty.
+def _check_is_data_frame(df, param_name,):
+    """This function checks if ``df`` is a valid ``DataFrame``, e.g., if it is ``DataFrame`` and if it is not empty.
 
-#     Parameters
-#     ----------
-#     df : any type
-#         The value to check if it is a ``DataFrame``.
-#     param_name : ``str``
-#         The original name of the parameter passed through the parameter ``df``.
-
-
-#     Returns
-#     -------
-#     ``True`` if ``df`` is a valid ``DataFrame``.
-#     Raises ``ValueError`` is ``df`` is not a valid ``DataFrame``.
+    Parameters
+    ----------
+    df : any type
+        The value to check if it is a ``DataFrame``.
+    param_name : ``str``
+        The original name of the parameter passed through the parameter ``df``.
 
 
-#     """
+    Returns
+    -------
+    ``True`` if ``df`` is a valid ``DataFrame``.
+    Raises ``ValueError`` is ``df`` is not a valid ``DataFrame``.
 
-#     if isinstance(df, pd.DataFrame) == False:
-#         try:
-#             raise TypeError("Not a DataFrame")
-#         except TypeError:
-#             print(f"\n\n The parameter '{param_name}' must be of type 'DataFrame', but its type is '{type(value).__name__}'.\n\n")
-#             raise
-#     if df.empty:
-#         try:
-#             raise TypeError("Empty DataFrame")
-#         except TypeError:
-#             print(f"\n\nThe given dataframe is empty!\n\n")
-#             raise
-#     return True
+
+    """
+
+    if isinstance(df, pd.DataFrame) == False:
+        try:
+            raise TypeError("Not a DataFrame")
+        except TypeError:
+            print(f"\n\n The parameter '{param_name}' must be of type 'DataFrame', but its type is '{type(df).__name__}'.\n\n")
+            raise
+    if df.empty:
+        try:
+            raise TypeError("Empty DataFrame")
+        except TypeError:
+            print(f"\n\nThe given dataframe is empty!\n\n")
+            raise
+    return True
 
 
 
