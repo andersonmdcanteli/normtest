@@ -2,9 +2,9 @@
 
 --------------------------------------------------------------------------------
 Command to run at the prompt:
-    python -m unittest -v tests/normtest/ryan-joiner/test_ordered_statistics.py
+    python -m unittest -v tests/normtest/generic/test_ordered_statistics.py
     or
-    python -m unittest -b tests/normtest/ryan-joiner/test_ordered_statistics.py
+    python -m unittest -b tests/normtest/generic/test_ordered_statistics.py
 
 --------------------------------------------------------------------------------
 """
@@ -34,6 +34,9 @@ class Test_ordered_statistics(unittest.TestCase):
         result = ordered_statistics(self.n, self.method)
         self.assertIsInstance(result, np.ndarray, msg=f"not a float when method={self.method} and n={self.n}")
 
+    def test_safe(self):
+        result = ordered_statistics(self.n, self.method, safe=True)
+        self.assertIsInstance(result, np.ndarray, msg=f"not a float when method={self.method} and n={self.n}")
 
     def test_blom_odd(self):
         n = 9
@@ -81,17 +84,17 @@ class Test_ordered_statistics(unittest.TestCase):
     def test_wrong_method(self):
 
         with self.assertRaises(ValueError, msg=f"Does not raised ValueError when method={None} and n={self.n}"):
-            result = ordered_statistics(self.n, None)    
+            result = ordered_statistics(self.n, None, safe=True)    
 
     def test_n_not_int(self):
         n_values = [5.1, "5", [5], (6,), ]
         for n in n_values:
             with self.assertRaises(TypeError, msg=f"Does not raised ValueError when method={self.method} and n={n}"):
-                result = ordered_statistics(n, self.method)     
+                result = ordered_statistics(n, self.method, safe=True)     
 
 
     def test_small_n(self):
         n_values = [-5, 0, 3]
         for n in n_values:
             with self.assertRaises(ValueError, msg=f"Does not raised ValueError when method={self.method} and n={n}"):
-                result = ordered_statistics(n, self.method)            
+                result = ordered_statistics(n, self.method, safe=True)            
