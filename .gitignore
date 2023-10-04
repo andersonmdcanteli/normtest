@@ -161,3 +161,4 @@ cython_debug/
 #.idea/
 # personal file
 main.py
+testes.ipynb

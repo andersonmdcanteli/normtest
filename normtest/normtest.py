@@ -126,7 +126,7 @@ def ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False):
     alpha : ``float``, optional
         The level of significance (``ɑ``). Must be ``0.01``, ``0.05`` (default) or ``0.10``;
     method : ``str``, optional
-        A string with the approximation method that should be adopted. The options are ``"blomr"`` (default), ``"blom2"``, ``"blom3"`` or ``"filliben"``. See `ordered_statistics` for details.
+        A string with the approximation method that should be adopted. The options are ``"blom"`` (default), ``"blom2"``, ``"blom3"`` or ``"filliben"``. See `ordered_statistics` for details.
     weighted : ``bool``, optional
         Whether to estimate the Normal order considering the repeats as its average (``True``) or not (``False``, default). Only has an effect if the dataset contains repeated values
         
@@ -236,7 +236,7 @@ def rj_correlation_plot(axes, x_data, method="blom", weighted=False):
     x_data : ``numpy array``
         One dimension :doc:`numpy array <numpy:reference/generated/numpy.array>` with at least ``4`` observations.
     method : ``str``
-        A string with the approximation method that should be adopted. The options are ``"blomr"`` (default), ``"blom2"``, ``"blom3"`` or ``"filliben"``. See `ordered_statistics` for details.
+        A string with the approximation method that should be adopted. The options are ``"blom"`` (default), ``"blom2"``, ``"blom3"`` or ``"filliben"``. See `ordered_statistics` for details.
     weighted : ``bool``, optional
         Whether to estimate the Normal order considering the repeats as its average (``True``) or not (``False``, default). Only has an effect if the dataset contains repeated values
         
@@ -310,7 +310,7 @@ def rj_dist_plot(axes, x_data, method="blom", min=4, max=50, deleted=False, weig
     x_data : ``numpy array``
         One dimension :doc:`numpy array <numpy:reference/generated/numpy.array>` with at least ``4`` observations.
     method : ``str``
-        A string with the approximation method that should be adopted. The options are ``"blomr"`` (default), ``"blom2"``, ``"blom3"`` or ``"filliben"``. See `ordered_statistics` for details.
+        A string with the approximation method that should be adopted. The options are ``"blom"`` (default), ``"blom2"``, ``"blom3"`` or ``"filliben"``. See `ordered_statistics` for details.
     min : ``int``
         The lower range of the number of observations for the critical values (default is ``4``);
     max : ``int``

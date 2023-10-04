@@ -389,29 +389,29 @@ def _check_is_integer(value, param_name):
             raise
     return True
 
-# def _check_is_list(value, param_name):
-#     """This function checks if a ``value`` is a ``list``.
+def _check_is_list(value, param_name):
+    """This function checks if a ``value`` is a ``list``.
 
-#     Parameters
-#     ----------
-#     value : any type
-#         The value to check if it is a ``list``.
-#     param_name : ``str``
-#         The original name of the parameter passed through the parameter ``value``.
+    Parameters
+    ----------
+    value : any type
+        The value to check if it is a ``list``.
+    param_name : ``str``
+        The original name of the parameter passed through the parameter ``value``.
 
-#     Returns
-#     -------
-#     ``True`` if ``value`` is a ``list``
-#     Raises ``TypeError`` if ``value`` is not a ``list``
+    Returns
+    -------
+    ``True`` if ``value`` is a ``list``
+    Raises ``TypeError`` if ``value`` is not a ``list``
 
-#     """
-#     if isinstance(value, list) == False:
-#         try:
-#             raise TypeError("Not a list error")
-#         except TypeError:
-#             print(f"\n\n The parameter '{param_name}' must be type of 'list', but it is '{type(value).__name__}'. \n\n")
-#             raise
-#     return True
+    """
+    if isinstance(value, list) == False:
+        try:
+            raise TypeError("Not a list error")
+        except TypeError:
+            print(f"\n\n The parameter '{param_name}' must be type of 'list', but it is '{type(value).__name__}'. \n\n")
+            raise
+    return True
 
 
 
@@ -486,58 +486,58 @@ def _check_is_numpy_1_D(value, param_name):
         return True
 
 
-# def _check_is_positive(value, param_name):
-#     """This function checks if ``value`` is a positive number.
+def _check_is_positive(value, param_name):
+    """This function checks if ``value`` is a positive number.
 
-#     Parameters
-#     ----------
-#     value : any
-#         The value to be tesed if it is a positive number
-#     param_name : ``str``
-#         The original name of the parameter passed through the parameter ``value``.
+    Parameters
+    ----------
+    value : any
+        The value to be tesed if it is a positive number
+    param_name : ``str``
+        The original name of the parameter passed through the parameter ``value``.
 
-#     Returns
-#     -------
-#     ``True`` if ``value`` is positive
-#     Raises ``ValueError`` if ``value`` is not positive
-
-
-#     """
-#     if value <= 0:
-#         try:
-#             raise ValueError("Not a positive value Error")
-#         except ValueError:
-#             print(f"\n\nThe parameter '{param_name}' must be a positive number, but it equals '{value}'\n\n")
-#             raise
-#     return True
+    Returns
+    -------
+    ``True`` if ``value`` is positive
+    Raises ``ValueError`` if ``value`` is not positive
 
 
+    """
+    if value <= 0:
+        try:
+            raise ValueError("Not a positive value Error")
+        except ValueError:
+            print(f"\n\nThe parameter '{param_name}' must be a positive number, but it equals '{value}'\n\n")
+            raise
+    return True
 
-# def _check_is_str(value, param_name):
-#     """This function checks if a ``value`` is a ``str``.
 
-#     Parameters
-#     ----------
-#     value : any type
-#         The value to check if it is a ``str``.
-#     param_name : ``str``
-#         The original name of the parameter passed through the parameter ``value``.
 
-#     Returns
-#     -------
-#     ``True`` if value is a valid ``str``.
-#     Raises ``ValueError`` is value is not a valid ``str``.
+def _check_is_str(value, param_name):
+    """This function checks if a ``value`` is a ``str``.
 
-#     """
-#     ### quering ###
+    Parameters
+    ----------
+    value : any type
+        The value to check if it is a ``str``.
+    param_name : ``str``
+        The original name of the parameter passed through the parameter ``value``.
 
-#     if isinstance(value, str) == False:
-#         try:
-#             raise ValueError("Not a string")
-#         except ValueError:
-#             print(f"\n\nThe parameter '{param_name}' must be a str, but it's type is '{type(value)}'\n\n")
-#             raise
-#         return True
+    Returns
+    -------
+    ``True`` if value is a valid ``str``.
+    Raises ``ValueError`` is value is not a valid ``str``.
+
+    """
+    ### quering ###
+
+    if isinstance(value, str) == False:
+        try:
+            raise ValueError("Not a string")
+        except ValueError:
+            print(f"\n\nThe parameter '{param_name}' must be a str, but it's type is '{type(value)}'\n\n")
+            raise
+        return True
 
 
 
@@ -603,17 +603,17 @@ def _check_is_subplots(value, param_name):
 #     else:
 #         return True
 
-# def _check_list_size(lista, param_name, minimum):
-#     """This function checks if the size of ``lista`` is equal or higher than ``minimum``.
+def _check_list_size(lista, param_name, minimum):
+    """This function checks if the size of ``lista`` is equal or higher than ``minimum``.
 
-#     Parameters
-#     ----------
-#     lista :  ``list``
-#         The list to be tested
-#     param_name : ``str``
-#         The name of the parameter passed through the parameter ``lista``.
-#     minimum : ``int``
-#         The lower bound (closed)
+    Parameters
+    ----------
+    lista :  ``list``
+        The list to be tested
+    param_name : ``str``
+        The name of the parameter passed through the parameter ``lista``.
+    minimum : ``int``
+        The lower bound (closed)
 
 
 
@@ -624,14 +624,14 @@ def _check_is_subplots(value, param_name):
 
 #     """
 
-#     if len(lista) < minimum:
-#         try:
-#             raise ValueError(f"Insufficiently sized array'")
-#         except ValueError:
-#             print(f"\n\nThe size of the '{param_name}' list must be at least equal to '{minimum}', but its size is equal to '{len(lista)}'\n\n")
-#             raise
-#     else:
-#         return True
+    if len(lista) < minimum:
+        try:
+            raise ValueError(f"Insufficiently sized array'")
+        except ValueError:
+            print(f"\n\nThe size of the '{param_name}' list must be at least equal to '{minimum}', but its size is equal to '{len(lista)}'\n\n")
+            raise
+    else:
+        return True
 
 # def _check_matching_sample_size(arr1, param_name1, arr2, param_name2):
 #     """This function checks if the size of arr1 is equal to the size of arr2.
