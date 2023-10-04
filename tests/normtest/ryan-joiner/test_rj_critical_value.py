@@ -33,6 +33,10 @@ class Test_rj_critical_value(unittest.TestCase):
         result = nm.rj_critical_value(self.n, self.alpha)
         self.assertIsInstance(result, float, msg=f"not a float when alpha={self.alpha} and n={self.n}")
 
+    def test_safe(self):
+        result = nm.rj_critical_value(self.n, self.alpha, safe=True)
+        self.assertIsInstance(result, float, msg=f"not a float when alpha={self.alpha} and n={self.n}")        
+
 
     def test_statext(self):
         # https://www.statext.com/practice/NormalityTest03.php
@@ -52,17 +56,17 @@ class Test_rj_critical_value(unittest.TestCase):
     def test_alpha_value(self):
         alpha=random.uniform(0, 1)
         with self.assertRaises(ValueError, msg=f"Does not raised ValueError when alpha={alpha} and n={self.n}"):
-            result = nm.rj_critical_value(self.n, alpha)
+            result = nm.rj_critical_value(self.n, alpha, safe=True)
 
     def test_n_not_int(self):
         n_values = [5.1, "5", [5], (6,), ]
         for n in n_values:
             with self.assertRaises(TypeError, msg=f"Does not raised ValueError when alpha={0.05} and n={n}"):
-                result = nm.rj_critical_value(n, 0.05)            
+                result = nm.rj_critical_value(n, 0.05, safe=True)
 
 
     def test_small_n(self):
         n_values = [-5, 0, 3]
         for n in n_values:
             with self.assertRaises(ValueError, msg=f"Does not raised ValueError when alpha={0.05} and n={n}"):
-                result = nm.rj_critical_value(n, 0.05)                   
+                result = nm.rj_critical_value(n, 0.05, safe=True)        

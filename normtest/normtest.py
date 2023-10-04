@@ -65,7 +65,7 @@ from .utils import constants
 ## RYAN - JOINER TEST ##
 
 # com testes ok
-def rj_critical_value(n, alpha=0.05):
+def rj_critical_value(n, alpha=0.05, safe=False):
     """This function calculates the critical value of the Ryan-Joiner test [1]_
     
     Parameters
@@ -74,6 +74,8 @@ def rj_critical_value(n, alpha=0.05):
         The sample size. Must be greater than ``3``;
     alpha : ``float``, optional
         The level of significance (``ɑ``). Must be ``0.01``, ``0.05`` (default) or ``0.10``;
+    safe : ``bool`` (optional)
+        Whether to check the inputs before performing the calculations (``True``) or not (``False``, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).        
         
     Returns
     -------        
@@ -111,9 +113,10 @@ def rj_critical_value(n, alpha=0.05):
     0.9178948637370312
 
     """
-    checkers._check_param_values(alpha, "alpha", param_values=[0.01, 0.05, 0.10])
-    checkers._check_is_integer(n, "n")
-    checkers._check_value_is_equal_or_higher_than(n, "n", 4)
+    if safe:
+        checkers._check_param_values(alpha, "alpha", param_values=[0.01, 0.05, 0.10])
+        checkers._check_is_integer(n, "n")
+        checkers._check_value_is_equal_or_higher_than(n, "n", 4)
     
     if alpha == 0.1:
         return 1.0071 - (0.1371 / np.sqrt(n)) - (0.3682 / n) + (0.7780 / n**2)
