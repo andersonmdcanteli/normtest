@@ -38,6 +38,12 @@ class Test_rj_correlation_plot(unittest.TestCase):
         self.assertIsInstance(result, SubplotBase, msg="not a SubplotBase")
         plt.close()
 
+    def test_safe(self):
+
+        result = rj_correlation_plot(self.axes, self.x_data, safe=True)
+        self.assertIsInstance(result, SubplotBase, msg="not a SubplotBase")
+        plt.close()        
+
 
 
     def test_basic_plot(self):

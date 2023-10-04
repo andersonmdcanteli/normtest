@@ -64,6 +64,86 @@ from .utils import constants
 
 ## RYAN - JOINER TEST ##
 
+
+# com alguns testes
+def rj_correlation_plot(axes, x_data, method="blom", weighted=False, safe=False):
+    """This function creates an axis with the Ryan-Joiner test correlation graph
+
+    Parameters
+    ----------
+    axes : ``matplotlib.axes.SubplotBase``
+        The axes to plot    
+    x_data : ``numpy array``
+        One dimension :doc:`numpy array <numpy:reference/generated/numpy.array>` with at least ``4`` observations.
+    method : ``str``
+        A string with the approximation method that should be adopted. The options are ``"blom"`` (default), ``"blom2"``, ``"blom3"`` or ``"filliben"``. See `ordered_statistics` for details.
+    weighted : ``bool``, optional
+        Whether to estimate the Normal order considering the repeats as its average (``True``) or not (``False``, default). Only has an effect if the dataset contains repeated values
+    safe : ``bool`` (optional)
+        Whether to check the inputs before performing the calculations (``True``) or not (``False``, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).        
+                
+    Returns
+    -------        
+    axes : ``matplotlib.axes._subplots.AxesSubplot``
+        The axis of the graph.
+
+    See Also
+    --------        
+    ordered_statistics
+    
+    Examples
+    --------
+    
+    """
+    if safe:
+        constants.warning_plot()
+        checkers._check_is_subplots(axes, "axes")
+        checkers._check_is_numpy_1_D(x_data, 'x_data')
+
+    # ordering the sample
+    x_data = np.sort(x_data)    
+    
+    # ordering
+    x_data = np.sort(x_data)    
+    if weighted:
+        df = pd.DataFrame({
+            "x_data": x_data
+        })
+        # getting mi values    
+        df["Rank"] = np.arange(1, df.shape[0]+1)
+        df["Ui"] = ordered_statistics(x_data.size, method=method)
+        df["Mi"] = df.groupby(["x_data"])["Ui"].transform('mean')
+        normal_ordered = stats.norm.ppf(df["Mi"])
+    else:
+        ordered = ordered_statistics(x_data.size, method=method)
+        normal_ordered = stats.norm.ppf(ordered)
+
+    # performing regression
+    reg = stats.linregress(normal_ordered, x_data)
+    # pred data
+    y_pred = normal_ordered*reg.slope + reg.intercept
+    
+    ## making the plot
+
+    # adding the data
+    axes.scatter(normal_ordered, x_data, fc="none", ec="k")
+   
+    # adding the trend line
+    axes.plot(normal_ordered, y_pred, c="r")
+    
+    # adding the statistic
+    text = "$R_{p}=" + str(round(reg.rvalue,4)) + "$"
+    axes.text(.1, .9, text, ha='left', va='center', transform=axes.transAxes)
+    
+    # perfuming
+    axes.set_xlabel("Normal statistical order")
+    axes.set_ylabel("Ordered data")    
+    
+    return axes
+
+
+
+
 # com testes ok
 def rj_critical_value(n, alpha=0.05, safe=False):
     """This function calculates the critical value of the Ryan-Joiner test [1]_
@@ -76,7 +156,7 @@ def rj_critical_value(n, alpha=0.05, safe=False):
         The level of significance (``ɑ``). Must be ``0.01``, ``0.05`` (default) or ``0.10``;
     safe : ``bool`` (optional)
         Whether to check the inputs before performing the calculations (``True``) or not (``False``, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).        
-        
+
     Returns
     -------        
     critical : ``float``
@@ -233,80 +313,6 @@ def ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False):
     p_value = rj_p_value(statistic, x_data.size)
     result = namedtuple("RyanJoiner", ("statistic", "critical", "p_value", "conclusion"))
     return result(statistic, critical_value, p_value, conclusion)
-
-
-# com alguns testes
-def rj_correlation_plot(axes, x_data, method="blom", weighted=False):
-    """This function creates an axis with the Ryan-Joiner test correlation graph
-
-    Parameters
-    ----------
-    axes : ``matplotlib.axes.SubplotBase``
-        The axes to plot    
-    x_data : ``numpy array``
-        One dimension :doc:`numpy array <numpy:reference/generated/numpy.array>` with at least ``4`` observations.
-    method : ``str``
-        A string with the approximation method that should be adopted. The options are ``"blom"`` (default), ``"blom2"``, ``"blom3"`` or ``"filliben"``. See `ordered_statistics` for details.
-    weighted : ``bool``, optional
-        Whether to estimate the Normal order considering the repeats as its average (``True``) or not (``False``, default). Only has an effect if the dataset contains repeated values
-        
-    Returns
-    -------        
-    axes : ``matplotlib.axes._subplots.AxesSubplot``
-        The axis of the graph.
-
-    See Also
-    --------        
-    ordered_statistics
-    
-    Examples
-    --------
-    
-    """
-    constants.warning_plot()
-    checkers._check_is_subplots(axes, "axes")
-    checkers._check_is_numpy_1_D(x_data, 'x_data')
-
-    # ordering the sample
-    x_data = np.sort(x_data)    
-    
-    # ordering
-    x_data = np.sort(x_data)    
-    if weighted:
-        df = pd.DataFrame({
-            "x_data": x_data
-        })
-        # getting mi values    
-        df["Rank"] = np.arange(1, df.shape[0]+1)
-        df["Ui"] = ordered_statistics(x_data.size, method=method)
-        df["Mi"] = df.groupby(["x_data"])["Ui"].transform('mean')
-        normal_ordered = stats.norm.ppf(df["Mi"])
-    else:
-        ordered = ordered_statistics(x_data.size, method=method)
-        normal_ordered = stats.norm.ppf(ordered)
-
-    # performing regression
-    reg = stats.linregress(normal_ordered, x_data)
-    # pred data
-    y_pred = normal_ordered*reg.slope + reg.intercept
-    
-    ## making the plot
-
-    # adding the data
-    axes.scatter(normal_ordered, x_data, fc="none", ec="k")
-   
-    # adding the trend line
-    axes.plot(normal_ordered, y_pred, c="r")
-    
-    # adding the statistic
-    text = "$R_{p}=" + str(round(reg.rvalue,4)) + "$"
-    axes.text(.1, .9, text, ha='left', va='center', transform=axes.transAxes)
-    
-    # perfuming
-    axes.set_xlabel("Normal statistical order")
-    axes.set_ylabel("Ordered data")    
-    
-    return axes
 
 
 # com alguns testes
