@@ -44,6 +44,17 @@ class Test_ryan_joiner(unittest.TestCase):
         self.assertIsInstance(result[3], str, msg="not str for met={self.method}, alpha={self.alpha}, data={self.data}")       
 
 
+    def test_safe(self):
+
+        result = ryan_joiner(self.data, alpha=0.05, method=self.method, safe=True)
+        self.assertIsInstance(result, tuple, msg=f"not a tuple")
+        self.assertEqual(len(result), 4, msg="Incorrect number of outputs")
+        self.assertIsInstance(result[0], float, msg=f"not a float for met={self.method}, alpha={self.alpha}, data={self.data}")
+        self.assertIsInstance(result[1], float, msg="not a float for met={self.method}, alpha={self.alpha}, data={self.data}")
+        self.assertIsInstance(result[2], (float, str), msg="not a float or for met={self.method}, alpha={self.alpha}, data={self.data}")
+        self.assertIsInstance(result[3], str, msg="not str for met={self.method}, alpha={self.alpha}, data={self.data}")       
+
+
     def test_statext(self):     
         # source https://www.statext.com/practice/NormalityTest03.php
         data = np.array([148, 154, 158, 160, 161, 162, 166, 170, 182, 195, 236])
@@ -264,4 +275,4 @@ class Test_ryan_joiner(unittest.TestCase):
         ]
         for d in data:
             with self.assertRaises(ValueError, msg=f"Does not raised ValueError when type = {type(d).__name__}"):
-                ryan_joiner(d)                   
+                ryan_joiner(d, safe=True)                   

@@ -366,7 +366,7 @@ def rj_p_value(statistic, n, safe=False):
 
 
 # com testes ok
-def ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False):
+def ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False, safe=False):
     """This function applies the Ryan-Joiner Normality test [1]_.
 
     Parameters
@@ -379,7 +379,8 @@ def ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False):
         A string with the approximation method that should be adopted. The options are ``"blom"`` (default), ``"blom2"``, ``"blom3"`` or ``"filliben"``. See `ordered_statistics` for details.
     weighted : ``bool``, optional
         Whether to estimate the Normal order considering the repeats as its average (``True``) or not (``False``, default). Only has an effect if the dataset contains repeated values
-        
+    safe : ``bool`` (optional)
+        Whether to check the inputs before performing the calculations (``True``) or not (``False``, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).                     
         
     Returns
     -------        
@@ -442,8 +443,9 @@ def ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False):
     >>> result = ryan_joiner(x_data)
     (0.9599407779411523, 0.9178948637370312, 'Fail to Reject H0')
     """
-    checkers._check_is_numpy_1_D(x_data, 'x_data')
-    checkers._check_is_bool(weighted, "weighted")
+    if safe:
+        checkers._check_is_numpy_1_D(x_data, 'x_data')
+        checkers._check_is_bool(weighted, "weighted")
 
     # ordering
     x_data = np.sort(x_data)    
