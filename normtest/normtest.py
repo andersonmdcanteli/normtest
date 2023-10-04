@@ -81,7 +81,7 @@ def rj_correlation_plot(axes, x_data, method="blom", weighted=False, safe=False)
         Whether to estimate the Normal order considering the repeats as its average (``True``) or not (``False``, default). Only has an effect if the dataset contains repeated values
     safe : ``bool`` (optional)
         Whether to check the inputs before performing the calculations (``True``) or not (``False``, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).        
-                
+
     Returns
     -------        
     axes : ``matplotlib.axes._subplots.AxesSubplot``
@@ -140,8 +140,6 @@ def rj_correlation_plot(axes, x_data, method="blom", weighted=False, safe=False)
     axes.set_ylabel("Ordered data")    
     
     return axes
-
-
 
 
 # com testes ok
@@ -204,6 +202,109 @@ def rj_critical_value(n, alpha=0.05, safe=False):
         return 1.0063 - (0.1288 / np.sqrt(n)) - (0.6118 / n) + (1.3505 / n**2)
     else: # alpha == 0.01: 
         return 0.9963 - (0.0211 / np.sqrt(n)) - (1.4106 / n) + (3.1791 / n**2)
+
+# com alguns testes
+def rj_dist_plot(axes, x_data, method="blom", min=4, max=50, deleted=False, weighted=False, safe=False):
+    """This function generates axis with critical data from the Ryan-Joiner Normality test
+    
+    Parameters
+    ----------
+    axes : ``matplotlib.axes.SubplotBase``
+        The axes to plot    
+    x_data : ``numpy array``
+        One dimension :doc:`numpy array <numpy:reference/generated/numpy.array>` with at least ``4`` observations.
+    method : ``str``
+        A string with the approximation method that should be adopted. The options are ``"blom"`` (default), ``"blom2"``, ``"blom3"`` or ``"filliben"``. See `ordered_statistics` for details.
+    min : ``int``
+        The lower range of the number of observations for the critical values (default is ``4``);
+    max : ``int``
+        The upper range of the number of observations for the critical values (default is ``50``);      
+    deleted : ``bool``
+        Whether it is (``True``) to insert the deleted data method or not (``False``, default). This function is only for exploring possibilities
+    weighted : ``bool``, optional
+        Whether to estimate the Normal order considering the repeats as its average (``True``) or not (``False``, default). Only has an effect if the dataset contains repeated values
+    safe : ``bool`` (optional)
+        Whether to check the inputs before performing the calculations (``True``) or not (``False``, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).
+
+    Returns
+    -------        
+    axes : ``matplotlib.axes._subplots.AxesSubplot``
+        The axis of the graph.
+
+
+    See Also
+    --------        
+    ryan_joiner
+    
+
+    Notes
+    -----
+    O método deleted consiste em aplicar o testes nos n-1 subconjuntos de dados obtidos com a remoção de 1 ponto do conjunto de dados.
+
+
+    References
+    ----------
+    .. [1]  RYAN, T. A., JOINER, B. L. Normal Probability Plots and Tests for Normality, Technical Report, Statistics Department, The Pennsylvania State University, 1976. Available at `www.additive-net.de <https://www.additive-net.de/de/component/jdownloads/send/70-support/236-normal-probability-plots-and-tests-for-normality-thomas-a-ryan-jr-bryan-l-joiner>`_. Access on: 22 Jul. 2023.
+
+
+    Examples
+    --------    
+    """
+    if safe:
+        checkers._check_is_subplots(axes, "axes")
+        checkers._check_is_numpy_1_D(x_data, 'x_data')
+        checkers._check_is_float_or_int(min, "min")
+        checkers._check_is_float_or_int(max, "max")
+        checkers._check_a_lower_than_b(min, max, "min", "max")
+        checkers._check_is_bool(deleted, "deleted")
+        checkers._check_is_bool(weighted, "weighted")
+
+    constants.warning_plot()
+
+    if x_data.size > max:
+        print(f"The graphical visualization is best suited if the sample size is smaller ({x_data.size}) than the max value ({max}).")
+    if x_data.size < min:
+        print(f"The graphical visualization is best suited if the sample size is greater ({x_data.size}) than the min value ({min}).")        
+        
+    n_samples = np.arange(min,max+1)    
+    alphas = [0.10, 0.05, 0.01]
+    alphas_label = ["$R_{p;10\%}^{'}$", "$R_{p;5\%}^{'}$", "$R_{p;1\%}^{'}$"]
+    colors = [(0.2980392156862745, 0.4470588235294118, 0.6901960784313725),
+            (0.8666666666666667, 0.5176470588235295, 0.3215686274509804),
+            (0.3333333333333333, 0.6588235294117647, 0.40784313725490196)]
+
+    # main test
+    result = ryan_joiner(x_data, method=method, weighted=weighted)
+    axes.scatter(x_data.size, result[0], color="r", label="$R_{p}$")
+    
+    # adding critical values
+    for alp, color, alp_label in zip(alphas, colors, alphas_label):
+        criticals = []
+        for sample in n_samples:
+            criticals.append(rj_critical_value(sample, alpha=alp))
+        axes.scatter(n_samples, criticals, label=alp_label, color=color, s=10)
+    
+    # if robust
+    if deleted:
+        for i in range(x_data.size):
+            x_reduced = np.delete(x_data, i)
+            result = ryan_joiner(x_reduced, method=method, weighted=weighted)
+            if i == 0:            
+                axes.scatter(x_reduced.size, result[0], ec="k", fc="none", label="Deleted")
+            else:
+                axes.scatter(x_reduced.size, result[0], ec="k", fc="none")
+        axes.set_title("Ryan-Joiner Normality test - robust approach")
+    else:
+        axes.set_title("Ryan-Joiner Normality test")
+    
+    # adding details
+    axes.legend(loc=4)   
+    axes.set_xlabel("Sample size")
+    axes.set_ylabel("Critical value")
+    
+    return axes
+
+
 
 # com testes ok
 def ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False):
@@ -315,102 +416,6 @@ def ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False):
     return result(statistic, critical_value, p_value, conclusion)
 
 
-# com alguns testes
-def rj_dist_plot(axes, x_data, method="blom", min=4, max=50, deleted=False, weighted=False):
-    """This function generates axis with critical data from the Ryan-Joiner Normality test
-    
-    Parameters
-    ----------
-    axes : ``matplotlib.axes.SubplotBase``
-        The axes to plot    
-    x_data : ``numpy array``
-        One dimension :doc:`numpy array <numpy:reference/generated/numpy.array>` with at least ``4`` observations.
-    method : ``str``
-        A string with the approximation method that should be adopted. The options are ``"blom"`` (default), ``"blom2"``, ``"blom3"`` or ``"filliben"``. See `ordered_statistics` for details.
-    min : ``int``
-        The lower range of the number of observations for the critical values (default is ``4``);
-    max : ``int``
-        The upper range of the number of observations for the critical values (default is ``50``);      
-    deleted : ``bool``
-        Whether it is (``True``) to insert the deleted data method or not (``False``, default). This function is only for exploring possibilities
-    weighted : ``bool``, optional
-        Whether to estimate the Normal order considering the repeats as its average (``True``) or not (``False``, default). Only has an effect if the dataset contains repeated values
-        
-    Returns
-    -------        
-    axes : ``matplotlib.axes._subplots.AxesSubplot``
-        The axis of the graph.
-
-
-    See Also
-    --------        
-    ryan_joiner
-    
-
-    Notes
-    -----
-    O método deleted consiste em aplicar o testes nos n-1 subconjuntos de dados obtidos com a remoção de 1 ponto do conjunto de dados.
-
-
-    References
-    ----------
-    .. [1]  RYAN, T. A., JOINER, B. L. Normal Probability Plots and Tests for Normality, Technical Report, Statistics Department, The Pennsylvania State University, 1976. Available at `www.additive-net.de <https://www.additive-net.de/de/component/jdownloads/send/70-support/236-normal-probability-plots-and-tests-for-normality-thomas-a-ryan-jr-bryan-l-joiner>`_. Access on: 22 Jul. 2023.
-
-
-    Examples
-    --------    
-    """
-    constants.warning_plot()
-    checkers._check_is_subplots(axes, "axes")
-    checkers._check_is_numpy_1_D(x_data, 'x_data')
-    checkers._check_is_float_or_int(min, "min")
-    checkers._check_is_float_or_int(max, "max")
-    checkers._check_a_lower_than_b(min, max, "min", "max")
-    checkers._check_is_bool(deleted, "deleted")
-    checkers._check_is_bool(weighted, "weighted")
-
-    if x_data.size > max:
-        print(f"The graphical visualization is best suited if the sample size is smaller ({x_data.size}) than the max value ({max}).")
-    if x_data.size < min:
-        print(f"The graphical visualization is best suited if the sample size is greater ({x_data.size}) than the min value ({min}).")        
-        
-    n_samples = np.arange(min,max+1)    
-    alphas = [0.10, 0.05, 0.01]
-    alphas_label = ["$R_{p;10\%}^{'}$", "$R_{p;5\%}^{'}$", "$R_{p;1\%}^{'}$"]
-    colors = [(0.2980392156862745, 0.4470588235294118, 0.6901960784313725),
-            (0.8666666666666667, 0.5176470588235295, 0.3215686274509804),
-            (0.3333333333333333, 0.6588235294117647, 0.40784313725490196)]
-
-    # main test
-    result = ryan_joiner(x_data, method=method, weighted=weighted)
-    axes.scatter(x_data.size, result[0], color="r", label="$R_{p}$")
-    
-    # adding critical values
-    for alp, color, alp_label in zip(alphas, colors, alphas_label):
-        criticals = []
-        for sample in n_samples:
-            criticals.append(rj_critical_value(sample, alpha=alp))
-        axes.scatter(n_samples, criticals, label=alp_label, color=color, s=10)
-    
-    # if robust
-    if deleted:
-        for i in range(x_data.size):
-            x_reduced = np.delete(x_data, i)
-            result = ryan_joiner(x_reduced, method=method, weighted=weighted)
-            if i == 0:            
-                axes.scatter(x_reduced.size, result[0], ec="k", fc="none", label="Deleted")
-            else:
-                axes.scatter(x_reduced.size, result[0], ec="k", fc="none")
-        axes.set_title("Ryan-Joiner Normality test - robust approach")
-    else:
-        axes.set_title("Ryan-Joiner Normality test")
-    
-    # adding details
-    axes.legend(loc=4)   
-    axes.set_xlabel("Sample size")
-    axes.set_ylabel("Critical value")
-    
-    return axes
 
 # com testes ok
 def rj_p_value(statistic, n):
