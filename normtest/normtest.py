@@ -550,6 +550,7 @@ def ordered_statistics(n, method):
     return mi
     
 
+# com alguns testes
 def normal_distribution_plot(axes, n_rep, seed=None, xinfo=[0.00001, 0.99999, 1000], loc=0.0, scale=1.0, safe=False):
     """This function draws a normal distribution chart with the experimental points and the distribution histogram
 
