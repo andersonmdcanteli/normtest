@@ -33,6 +33,9 @@ class Test_rj_p_value(unittest.TestCase):
         result = rj_p_value(self.statistic, self.n)
         self.assertIsInstance(result, (float, str), msg=f"not a float when statistic={self.statistic} and n={self.n}")
 
+    def test_safe(self):
+        result = rj_p_value(self.statistic, self.n, safe=True)
+        self.assertIsInstance(result, (float, str), msg=f"not a float when statistic={self.statistic} and n={self.n}")
 
     def test_p_values_minitab(self):
         # dataset 1
@@ -97,4 +100,4 @@ class Test_rj_p_value(unittest.TestCase):
         statistics = [-1, 0, 1, 3]
         for statistic in statistics:
             with self.assertRaises(ValueError, msg=f"Does not raised ValueError when statistic={statistic} and n={self.n}"):
-                result = rj_p_value(statistic, self.n)
+                result = rj_p_value(statistic, self.n, safe=True)

@@ -305,6 +305,65 @@ def rj_dist_plot(axes, x_data, method="blom", min=4, max=50, deleted=False, weig
     return axes
 
 
+# com testes ok
+def rj_p_value(statistic, n, safe=False):
+    """This function estimates the probability associated with the Ryan-Joiner Normality test
+
+    Parameters
+    ----------
+    statistic : ``float`` (positive)
+        The Ryan-Joiner test statistics
+    n : ``int``
+        The sample size. Must be greater than ``3``
+    safe : ``bool`` (optional)
+        Whether to check the inputs before performing the calculations (``True``) or not (``False``, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).             
+
+    Returns
+    -------        
+    p_value : ``float`` or ``str``
+        The probability of the test
+        
+    See Also
+    --------        
+    ryan_joiner
+    
+
+    Notes
+    -----
+    The test probability is estimated through linear interpolation of the test statistic with critical values from the Ryan-Joiner test [1]_. The Interpolation is performed using the ``stats.interpolate.interp1d`` function.
+    
+    * If the test statistic is greater than the critical value for :math:`\alpha=0.10`, the result is always "p > 0.100".
+    * If the test statistic is lower than the critical value for :math:`\alpha=0.01`, the result is always "p < 0.010""
+
+
+
+    References
+    ----------
+    .. [1]  RYAN, T. A., JOINER, B. L. Normal Probability Plots and Tests for Normality, Technical Report, Statistics Department, The Pennsylvania State University, 1976. Available at `www.additive-net.de <https://www.additive-net.de/de/component/jdownloads/send/70-support/236-normal-probability-plots-and-tests-for-normality-thomas-a-ryan-jr-bryan-l-joiner>`_. Access on: 22 Jul. 2023.
+
+
+    Examples
+    --------
+    >>> p_value = nm.rj_p_value(.90, 10)
+    >>> print(p_value)  
+    0.030930589077996555
+
+    """
+    if safe:
+        checkers._check_data_in_range(statistic, "statistic", 0, 1)
+        
+    alphas = np.array([0.10, 0.05, 0.01])
+    criticals = np.array([rj_critical_value(n, alpha=alphas[0]), rj_critical_value(n, alpha=alphas[1]), rj_critical_value(n, alpha=alphas[2])])
+    f = interpolate.interp1d(criticals, alphas)
+    if statistic > max(criticals):
+        return "p > 0.100"
+    elif statistic < min(criticals):
+        return "p < 0.010"
+    else:
+        p_value = f(statistic) 
+        return p_value
+
+
 
 # com testes ok
 def ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False):
@@ -415,61 +474,6 @@ def ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False):
     result = namedtuple("RyanJoiner", ("statistic", "critical", "p_value", "conclusion"))
     return result(statistic, critical_value, p_value, conclusion)
 
-
-
-# com testes ok
-def rj_p_value(statistic, n):
-    """This function estimates the probability associated with the Ryan-Joiner Normality test
-
-    Parameters
-    ----------
-    statistic : ``float`` (positive)
-        The Ryan-Joiner test statistics
-    n : ``int``
-        The sample size. Must be greater than ``3``;        
-
-    Returns
-    -------        
-    p_value : ``float`` or ``str``
-        The probability of the test
-        
-    See Also
-    --------        
-    ryan_joiner
-    
-
-    Notes
-    -----
-    The test probability is estimated through linear interpolation of the test statistic with critical values from the Ryan-Joiner test [1]_. The Interpolation is performed using the ``stats.interpolate.interp1d`` function.
-    
-    * If the test statistic is greater than the critical value for :math:`\alpha=0.10`, the result is always "p > 0.100".
-    * If the test statistic is lower than the critical value for :math:`\alpha=0.01`, the result is always "p < 0.010""
-
-
-
-    References
-    ----------
-    .. [1]  RYAN, T. A., JOINER, B. L. Normal Probability Plots and Tests for Normality, Technical Report, Statistics Department, The Pennsylvania State University, 1976. Available at `www.additive-net.de <https://www.additive-net.de/de/component/jdownloads/send/70-support/236-normal-probability-plots-and-tests-for-normality-thomas-a-ryan-jr-bryan-l-joiner>`_. Access on: 22 Jul. 2023.
-
-
-    Examples
-    --------
-    >>> p_value = nm.rj_p_value(.90, 10)
-    >>> print(p_value)  
-    0.030930589077996555
-
-    """
-    checkers._check_data_in_range(statistic, "statistic", 0, 1)
-    alphas = np.array([0.10, 0.05, 0.01])
-    criticals = np.array([rj_critical_value(n, alpha=alphas[0]), rj_critical_value(n, alpha=alphas[1]), rj_critical_value(n, alpha=alphas[2])])
-    f = interpolate.interp1d(criticals, alphas)
-    if statistic > max(criticals):
-        return "p > 0.100"
-    elif statistic < min(criticals):
-        return "p < 0.010"
-    else:
-        p_value = f(statistic) 
-        return p_value
 
 
 ## GENERIC FUNCTIONS ##
