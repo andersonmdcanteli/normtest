@@ -4,7 +4,7 @@
 
 This repository contains functions related to the application of various Normality tests.
 
-Implemented tTests :
+Implemented Tests :
 
 * Ryan-Joiner;
 
