@@ -11,6 +11,7 @@
 - rj_correlation_plot(axes, x_data, method="blom", weighted=False)
 - rj_dist_plot(axes, x_data, method="blom", min=4, max=50, deleted=False, weighted=False)
 
+- make_bar_plot(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, tests_column_names=None, normal=True, safe=False)
 - make_heatmap(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, tests_column_names=None, normal=True, safe=False)
 - normal_distribution_plot(axes, n_rep, seed=None, xinfo=[0.00001, 0.99999, 1000], loc=0.0, scale=1.0, safe=False)
 - ordered_statistics(n, method)
@@ -520,6 +521,214 @@ def ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False, safe=False):
 
 ## GENERIC FUNCTIONS ##
 
+# com alguns testes
+def make_bar_plot(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, tests_column_names=None, normal=True, safe=False):
+    """This function draws a bar plot with the results obtained with normality tests.
+
+    Parameters
+    ----------
+    axes : matplotlib.axes.SubplotBase
+        The axes to plot.    
+    df : :doc:`DataFrame <pandas:reference/api/pandas.DataFrame>`
+        A dataframe with at least three columns containing the adopted significance level, the sample size and the result of at least one test. Columns with results must contain only *bool* values.
+    n_samples : int
+        The number of sets used in the tests.
+    alpha_column_name : str, optional
+        The name of the column containing the significance levels adopted for each execution. If *None*, the name of the first column of the *df* is assigned to this parameter.
+    n_rep_name : str, optional
+        The name of the column containing the size of the sample used for each execution. If *None*, the name of the second column of the *df* is assigned to this parameter.   
+    tests_column_names : list of str, optional
+        A *list* containing the names of the columns with the results of each test. If *None*, the names of all columns in the *df* are assigned to this parameter, with the exception of the first two columns.
+    normal : bool, optional
+        Whether to consider the data truly coming from the Normal distribution (*True*, default) or not (*False*). 
+
+        * If *True*, columns containing test results will have *True* values replaced by ``1`` and *False* values replaced by ``0``
+        * If ``False``, columns containing test results will have ``True`` values replaced by ``0`` and *False* values replaced by ``1``;
+
+    safe : bool, optional
+        Whether to check the inputs before performing the calculations (*True*) or not (*False*, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).
+
+    Returns
+    -------        
+    axes : matplotlib.axes.SubplotBase
+        The axis of the graph.
+    df : :doc:`DataFrame <pandas:reference/api/pandas.DataFrame>`
+        The modified *df* with the estimated probabilities for the tests used to draw the heatmap.        
+
+    Notes
+    -----
+    If *alpha_column_name* or *n_rep_name* or *tests_column_names* are *None*, they are all interpreted as *None*.
+
+
+    See Also
+    --------  
+    normal_distribution_plot    
+
+    Examples
+    --------
+    >>> from normtest import normtest
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> import pandas as pd
+
+    Preparing the data
+
+    >>> n_samples = 100
+    >>> seeds = np.arange(1, n_samples+1)
+    >>> rng = np.random.default_rng(42)
+    >>> rng.shuffle(seeds)
+    >>> n_rep = np.arange(4,31)
+    >>> alphas = [0.1, 0.05, 0.01]
+    >>> seed_values = []
+    >>> alpha_list = []
+    >>> blom_1 = []
+    >>> blom_2 = []
+    >>> blom_3 = []
+    >>> n_rep_list = []
+
+    Applying normality tests
+
+    >>> for seed in seeds:
+    >>>     rng = np.random.default_rng(seed=seed)
+    >>>     normal_data = rng.normal(loc=0, scale=1.0, size=max(n_rep))
+    >>>     for n in n_rep:
+    >>>         for alpha in alphas:
+    >>>             n_rep_list.append(n)
+    >>>             seed_values.append(seed)
+    >>>             if alpha == 0.1:
+    >>>                 alpha_list.append("0.10")
+    >>>             elif alpha == 0.05:
+    >>>                 alpha_list.append("0.05")
+    >>>             else:
+    >>>                 alpha_list.append("0.01")
+    >>>             result = normtest.ryan_joiner(x_data=normal_data[:n], method="blom", alpha=alpha)
+    >>>             if result.statistic < result.critical:
+    >>>                 blom_1.append(False)
+    >>>             else:
+    >>>                 blom_1.append(True)
+    >>>             result = normtest.ryan_joiner(x_data=normal_data[:n], method="blom2", alpha=alpha)
+    >>>             if result.statistic < result.critical:
+    >>>                 blom_2.append(False)            
+    >>>             else:
+    >>>                 blom_2.append(True)                
+    >>>             result = normtest.ryan_joiner(x_data=normal_data[:n], method="blom3", alpha=alpha)
+    >>>             if result.statistic < result.critical:
+    >>>                 blom_3.append(False)
+    >>>             else:
+    >>>                 blom_3.append(True)                                
+            
+    Creating the input dataframe
+
+    >>> df_data = pd.DataFrame({
+    >>>     "Alpha": alpha_list,
+    >>>     "n amostral": n_rep_list,
+    >>>     "blom": blom_1,
+    >>>     "blom2": blom_2,
+    >>>     "blom3": blom_3,       
+    >>> })
+    
+    Generating the bar plot
+
+    >>> fig, ax = plt.subplots(figsize=(16,4))
+    >>> ax, df = normtest.make_bar_plot(axes=ax, df=df_data, n_samples=n_samples, normal=False)
+    >>> fig.tight_layout()
+    >>> # plt.savefig("make_bar_plot.png", bbox_inches='tight')
+    >>> plt.show()
+    
+    .. image:: img/make_bar_plot.png
+        :alt: Bar plot for Ryan-Joiner test and its variants
+        :align: center      
+
+
+    """    
+    if alpha_column_name is None or n_rep_name is None or tests_column_names is None:
+        alpha_column_name = df.columns[0]
+        n_rep_name = df.columns[1]
+        tests_column_names = df.columns[2:]
+    else:
+        if safe:
+            checkers._check_is_subplots(axes, "axes")
+            checkers._check_is_data_frame(df, "df")
+            if df.shape[0] < 3:
+                try:
+                    raise ValueError("Missing columns error")
+                except ValueError:
+                    print(f"\n\nThe data frame 'df' must contain at least 3 columns, but it only contains {df.shape[0]}.\n\n")
+                    raise            
+            checkers._check_is_integer(n_samples, "n_samples")
+            checkers._check_value_is_equal_or_higher_than(n_samples, "n_samples", 2)
+            checkers._check_is_str(alpha_column_name, "alpha_column_name")
+            checkers._check_is_str(n_rep_name, "n_rep_name")
+            checkers._check_is_list(tests_column_names, "tests_column_names")
+            for i in range(len(tests_column_names)):
+                checkers._check_is_str(tests_column_names[i], f"tests_column_names[{i}]")
+            checkers._check_is_bool(normal, "normal")
+            for test in (tests_column_names):
+                if df[tests_column_names].dtype != bool:
+                    try:
+                        raise ValueError("Not boolean error")
+                    except ValueError:
+                        print(f"\n\nThe Column '{test}' must contain only boolean values.\n\n")
+                        raise
+    
+    constants.warning_plot()
+    df = df.copy()
+
+    if normal:
+        true = 1
+        false = 0
+    else:
+        true = 0
+        false = 1
+
+    # replacing true and false to zero and ones
+    for test in tests_column_names:
+        df[test] = df[test].replace({True: true, False: false})
+
+    # finding unique alpha values
+    alphas = df[alpha_column_name].unique()
+    
+
+    # splitting df into dfs based on alpha
+    dfs = []
+    for alpha in alphas:
+        dfs.append(
+                df[df[alpha_column_name] == alpha]
+        )
+    # dropping alpha column
+    for i in range(len(dfs)):
+        dfs[i] = dfs[i].drop(alpha_column_name, axis=1)
+    
+        
+    # grouping
+    for i in range(len(dfs)):
+        dfs[i] = dfs[i][
+            dfs[i].columns[1:]
+        ].groupby(dfs[i][dfs[i].columns[0]]).agg("sum")
+
+    # concatting     
+    df = pd.concat(dfs, axis='columns')
+
+    # percentages
+    df = df*100/n_samples
+    
+    df = df.mean().to_frame(name="Percentages")
+    df["Tests"] = df.index
+    df = df.reset_index(drop=True)
+    alphas = np.repeat(alphas, len(dfs),)
+
+    df["Alpha"] = alphas
+
+    sns.barplot(data = df, x="Tests", y="Percentages", hue="Alpha", ax=axes)
+    for container in axes.containers:
+        axes.bar_label(container, fmt='%.1f%%')
+
+    ymin, ymax = axes.get_ylim()
+    axes.set_ylim(ymin, ymax*1.1)
+    axes.set_xlabel(None)
+    
+    return axes, df
+
 
 # com alguns testes
 def make_heatmap(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, tests_column_names=None, normal=True, safe=False):
@@ -723,6 +932,9 @@ def make_heatmap(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, t
                      cbar_kws={"pad":0.02}
                      )
     return axes, df
+
+
+
 
 
 # com alguns testes
