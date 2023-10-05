@@ -21,6 +21,7 @@ Welcome to normtest's documentation!
 .. toctree::
    :maxdepth: 1
    
+   source/index
    source/contribute
 
 

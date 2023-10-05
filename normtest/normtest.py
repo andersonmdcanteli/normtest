@@ -65,38 +65,55 @@ from .utils import constants
 
 # com alguns testes
 def rj_correlation_plot(axes, x_data, method="blom", weighted=False, safe=False):
-    """This function creates an axis with the Ryan-Joiner test correlation graph
+    """This function creates an axis with the Ryan-Joiner test correlation graph.
 
     Parameters
     ----------
-    axes : ``matplotlib.axes.SubplotBase``
-        The axes to plot    
-    x_data : ``numpy array``
+    axes : matplotlib.axes.SubplotBase
+        The axes to plot.    
+    x_data : :doc:`numpy array <numpy:reference/generated/numpy.array>`
         One dimension :doc:`numpy array <numpy:reference/generated/numpy.array>` with at least ``4`` observations.
-    method : ``str``
-        A string with the approximation method that should be adopted. The options are ``"blom"`` (default), ``"blom2"``, ``"blom3"`` or ``"filliben"``. See `ordered_statistics` for details.
-    weighted : ``bool``, optional
-        Whether to estimate the Normal order considering the repeats as its average (``True``) or not (``False``, default). Only has an effect if the dataset contains repeated values
-    safe : ``bool`` (optional)
-        Whether to check the inputs before performing the calculations (``True``) or not (``False``, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).        
+    method : str
+        A *str* with the approximation method that should be adopted. The options are *"blom"* (default), *"blom2"* or *"blom3"*. See :ref:`ordered_statistics` for details.
+    weighted : bool, optional
+        Whether to estimate the Normal order considering the repeats as its average (*True*) or not (*False*, default). Only has an effect if the dataset contains repeated values.
+    safe : bool, optional
+        Whether to check the inputs before performing the calculations (*True*) or not (*False*, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).        
 
     Returns
     -------        
-    axes : ``matplotlib.axes._subplots.AxesSubplot``
+    axes : matplotlib.axes.SubplotBase
         The axis of the graph.
 
     See Also
     --------        
     ordered_statistics
+    rj_p_value
+    ryan_joiner    
     
     Examples
     --------
-    
+    >>> from normtest import normtest
+    >>> import matplotlib.pyplot as plt
+    >>> from scipy import stats
+    >>> data = stats.norm.rvs(loc=0, scale=1, size=30, random_state=42)
+    >>> fig, ax = plt.subplots(figsize=(6,4))
+    >>> normtest.rj_correlation_plot(axes=ax, x_data=data)
+    >>> #plt.savefig("rj_correlation_plot.png")
+    >>> plt.show()
+
+    .. image:: img/rj_correlation_plot.png
+        :alt: Correlaion chart for Ryan-Joiner test Normality test
+        :align: center      
+
+
     """
+    
     if safe:
-        constants.warning_plot()
         checkers._check_is_subplots(axes, "axes")
         checkers._check_is_numpy_1_D(x_data, 'x_data')
+
+    constants.warning_plot()
 
     # ordering the sample
     x_data = np.sort(x_data)    
@@ -142,25 +159,26 @@ def rj_correlation_plot(axes, x_data, method="blom", weighted=False, safe=False)
 
 # com testes ok
 def rj_critical_value(n, alpha=0.05, safe=False):
-    """This function calculates the critical value of the Ryan-Joiner test [1]_
+    """This function calculates the critical value of the Ryan-Joiner test [1]_.
     
     Parameters
     ----------
-    n : ``int``
-        The sample size. Must be greater than ``3``;
-    alpha : ``float``, optional
-        The level of significance (``ɑ``). Must be ``0.01``, ``0.05`` (default) or ``0.10``;
-    safe : ``bool`` (optional)
-        Whether to check the inputs before performing the calculations (``True``) or not (``False``, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).        
+    n : int
+        The sample size. Must be greater than ``3``.
+    alpha : float, optional
+        The level of significance (:math:`\\alpha`). Must be ``0.01``, ``0.05`` (default) or ``0.10``.
+    safe : bool, optional
+        Whether to check the inputs before performing the calculations (*True*) or not (*False*, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).        
 
     Returns
     -------        
-    critical : ``float``
-        The critical value of the test
+    critical : float
+        The critical value of the test.
         
     See Also
     --------        
-    pass
+    rj_p_value
+    ryan_joiner
     
 
     Notes
@@ -185,7 +203,9 @@ def rj_critical_value(n, alpha=0.05, safe=False):
 
     Examples
     --------
-    >>> rj_critical_value(10, alpha=0.05)  
+    >>> from normtest import normtest
+    >>> result = normtest.rj_critical_value(10, alpha=0.05)  
+    >>> print(result)
     0.9178948637370312
 
     """
@@ -203,41 +223,42 @@ def rj_critical_value(n, alpha=0.05, safe=False):
 
 # com alguns testes
 def rj_dist_plot(axes, x_data, method="blom", min=4, max=50, deleted=False, weighted=False, safe=False):
-    """This function generates axis with critical data from the Ryan-Joiner Normality test
+    """This function generates axis with critical data from the Ryan-Joiner Normality test.
     
     Parameters
     ----------
-    axes : ``matplotlib.axes.SubplotBase``
+    axes : matplotlib.axes.SubplotBase
         The axes to plot    
-    x_data : ``numpy array``
+    x_data : :doc:`numpy array <numpy:reference/generated/numpy.array>`
         One dimension :doc:`numpy array <numpy:reference/generated/numpy.array>` with at least ``4`` observations.
-    method : ``str``
-        A string with the approximation method that should be adopted. The options are ``"blom"`` (default), ``"blom2"``, ``"blom3"`` or ``"filliben"``. See `ordered_statistics` for details.
-    min : ``int``
-        The lower range of the number of observations for the critical values (default is ``4``);
-    max : ``int``
-        The upper range of the number of observations for the critical values (default is ``50``);      
-    deleted : ``bool``
-        Whether it is (``True``) to insert the deleted data method or not (``False``, default). This function is only for exploring possibilities
-    weighted : ``bool``, optional
-        Whether to estimate the Normal order considering the repeats as its average (``True``) or not (``False``, default). Only has an effect if the dataset contains repeated values
-    safe : ``bool`` (optional)
-        Whether to check the inputs before performing the calculations (``True``) or not (``False``, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).
+    method : str, optional
+        A string with the approximation method that should be adopted. The options are *"blom"* (default), *"blom2"* or *"blom3"*. See :ref:`ordered_statistics` for details.
+    min : int, optional
+        The lower range of the number of observations for the critical values (default is ``4``).
+    max : int, optional
+        The upper range of the number of observations for the critical values (default is ``50``).  
+    deleted : bool, optional
+        Whether it is to insert the deleted data method (*True*)  or not (*False*, default). This function is only for exploring possibilities.
+    weighted : *bool*, optional
+        Whether to estimate the Normal order considering the repeats as its average (*True*) or not (*False*, default). Only has an effect if the dataset contains repeated values.
+    safe : bool, optional
+        Whether to check the inputs before performing the calculations (*True*) or not (*False*, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).
 
     Returns
     -------        
-    axes : ``matplotlib.axes._subplots.AxesSubplot``
+    axes : matplotlib.axes.SubplotBase
         The axis of the graph.
 
 
     See Also
     --------        
     ryan_joiner
+    rj_correlation_plot
     
 
     Notes
     -----
-    O método deleted consiste em aplicar o testes nos n-1 subconjuntos de dados obtidos com a remoção de 1 ponto do conjunto de dados.
+    The *deleted* parameter consists of applying the tests to :math:`n-1` subsets of data obtained by removing 1 point from the data set.
 
 
     References
@@ -246,7 +267,20 @@ def rj_dist_plot(axes, x_data, method="blom", min=4, max=50, deleted=False, weig
 
 
     Examples
-    --------    
+    --------  
+    >>> from normtest import normtest
+    >>> import matplotlib.pyplot as plt
+    >>> from scipy import stats
+    >>> data = stats.norm.rvs(loc=0, scale=1, size=30, random_state=42)
+    >>> fig, ax = plt.subplots(figsize=(6,4))
+    >>> normtest.rj_dist_plot(axes=ax, x_data=data)
+    >>> plt.savefig("rj_dist_plot.png")
+    >>> plt.show()
+
+    .. image:: img/rj_dist_plot.png
+        :alt: Critical chart for Ryan-Joiner test Normality test
+        :align: center    
+
     """
     if safe:
         checkers._check_is_subplots(axes, "axes")
@@ -305,33 +339,34 @@ def rj_dist_plot(axes, x_data, method="blom", min=4, max=50, deleted=False, weig
 
 # com testes ok
 def rj_p_value(statistic, n, safe=False):
-    """This function estimates the probability associated with the Ryan-Joiner Normality test
+    """This function estimates the probability associated with the Ryan-Joiner Normality test.
 
     Parameters
     ----------
-    statistic : ``float`` (positive)
-        The Ryan-Joiner test statistics
-    n : ``int``
-        The sample size. Must be greater than ``3``
-    safe : ``bool`` (optional)
-        Whether to check the inputs before performing the calculations (``True``) or not (``False``, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).             
+    statistic : float (positive)
+        The Ryan-Joiner test statistics.
+    n : int
+        The sample size. Must be greater than ``3``.
+    safe : bool, optional
+        Whether to check the inputs before performing the calculations (*True*) or not (*False*, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).             
 
     Returns
     -------        
-    p_value : ``float`` or ``str``
-        The probability of the test
+    p_value : float or str
+        The probability of the test.
         
     See Also
     --------        
+    rj_critical_value
     ryan_joiner
     
 
     Notes
     -----
-    The test probability is estimated through linear interpolation of the test statistic with critical values from the Ryan-Joiner test [1]_. The Interpolation is performed using the ``stats.interpolate.interp1d`` function.
+    The test probability is estimated through linear interpolation of the test statistic with critical values from the Ryan-Joiner test [1]_. The Interpolation is performed using the :doc:`scipy.interpolate.interp1d() <scipy:reference/generated/scipy.interpolate.interp1d>` function.
     
-    * If the test statistic is greater than the critical value for :math:`\alpha=0.10`, the result is always "p > 0.100".
-    * If the test statistic is lower than the critical value for :math:`\alpha=0.01`, the result is always "p < 0.010""
+    * If the test statistic is greater than the critical value for :math:`\\alpha=0.10`, the result is always *"p > 0.100"*.
+    * If the test statistic is lower than the critical value for :math:`\\alpha=0.01`, the result is always *"p < 0.010"*.
 
 
 
@@ -342,8 +377,9 @@ def rj_p_value(statistic, n, safe=False):
 
     Examples
     --------
-    >>> p_value = nm.rj_p_value(.90, 10)
-    >>> print(p_value)  
+    >>> from normtest import normtest
+    >>> p_value = normtest.rj_p_value(statistic=.90, n=10)
+    >>> print(p_value)
     0.030930589077996555
 
     """
@@ -369,33 +405,35 @@ def ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False, safe=False):
 
     Parameters
     ----------
-    x_data : ``numpy array``
+    x_data : :doc:`numpy array <numpy:reference/generated/numpy.array>`
         One dimension :doc:`numpy array <numpy:reference/generated/numpy.array>` with at least ``4`` observations.
-    alpha : ``float``, optional
-        The level of significance (``ɑ``). Must be ``0.01``, ``0.05`` (default) or ``0.10``;
-    method : ``str``, optional
-        A string with the approximation method that should be adopted. The options are ``"blom"`` (default), ``"blom2"``, ``"blom3"`` or ``"filliben"``. See `ordered_statistics` for details.
-    weighted : ``bool``, optional
-        Whether to estimate the Normal order considering the repeats as its average (``True``) or not (``False``, default). Only has an effect if the dataset contains repeated values
-    safe : ``bool`` (optional)
-        Whether to check the inputs before performing the calculations (``True``) or not (``False``, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).                     
+    alpha : float, optional
+        The level of significance (:math:`\\alpha`). Must be ``0.01``, ``0.05`` (default) or ``0.10``.
+    method : str, optional
+        A string with the approximation method that should be adopted. The options are *"blom"* (default), *"blom2"* or *"blom3"*. See :ref:`ordered_statistics` for details.
+    weighted : bool, optional
+        Whether to estimate the Normal order considering the repeats as its average (*True*) or not (*False*, default). Only has an effect if the dataset contains repeated values
+    safe : bool, optional
+        Whether to check the inputs before performing the calculations (*True*) or not (*False*, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).                     
         
     Returns
     -------        
-    result : ``tuple`` with
-        statistic : ``float``
+    result : tuple with
+        statistic : float
             The test statistic.
-        critical : ``float``
+        critical : float
             The critical value.
-        p_value : ``float`` or ``str``
-            The probability of the test
-        conclusion : ``str``
+        p_value : float or str
+            The probability of the test.
+        conclusion : str
             The test conclusion (e.g, Normal/Not Normal).
 
 
     See Also
     --------        
     ordered_statistics
+    rj_dist_plot
+    rj_correlation_plot
     
 
     Notes
@@ -406,9 +444,9 @@ def ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False, safe=False):
 
             R_{p}=\\dfrac{\\sum_{i=1}^{n}x_{(i)}z_{(i)}}{\\sqrt{s^{2}(n-1)\\sum_{i=1}^{n}z_{(i)}^2}}
 
-    where :math:`z_{(i)}` values are the z-score values of the corresponding experimental data (:math:`x_({i)}`) value and :math:`s^{2}` is the sample variance.
+    where :math:`z_{(i)}` values are the z-score values of the corresponding experimental data (:math:`x_{({i)}}`) value and :math:`s^{2}` is the sample variance.
     
-    The correlation is estimated using ``stats.pearsonr()``.
+    The correlation is estimated using :doc:`scipy.stats.pearsonr() <scipy:reference/generated/scipy.stats.pearsonr>`.
 
     The Normality test has the following assumptions:
     
@@ -419,11 +457,11 @@ def ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False, safe=False):
        :math:`H_1:` The data was sampled from a distribution other than the Normal distribution.
 
 
-    The conclusion of the test is based on the comparison between the ``critical`` value (at ``ɑ`` significance level) and ``statistic`` of the test:
+    The conclusion of the test is based on the comparison between the *critical* value (at :math:`\\alpha`` significance level) and *statistic* of the test:
 
-    .. code:: python
+    .. admonition:: \u2615
 
-       if critical <= statistic:
+       if critical :math:`\leq` statistic:
            Fail to reject :math:`H_0:` (e.g., data is Normal)
        else:
            Reject :math:`H_0:` (e.g., data is not Normal)
@@ -437,9 +475,13 @@ def ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False, safe=False):
 
     Examples
     --------
-    >>> x_data = np.array([1.90642, 2.22488, 2.10288, 1.69742, 1.52229, 3.15435, 2.61826, 1.98492, 1.42738, 1.99568])
-    >>> result = ryan_joiner(x_data)
-    (0.9599407779411523, 0.9178948637370312, 'Fail to Reject H0')
+    >>> from normtest import normtest
+    >>> from scipy import stats
+    >>> data = stats.norm.rvs(loc=0, scale=1, size=30, random_state=42)
+    >>> result = normtest.ryan_joiner(data)
+    >>> print(result)
+    RyanJoiner(statistic=0.990439558451558, critical=0.963891667086667, p_value='p > 0.100', conclusion='Fail to reject H₀')
+    
     """
     if safe:
         checkers._check_is_numpy_1_D(x_data, 'x_data')
@@ -481,44 +523,123 @@ def ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False, safe=False):
 
 # com alguns testes
 def make_heatmap(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, tests_column_names=None, normal=True, safe=False):
-    """This function draws a heat map of the results obtained with normality tests
+    """This function draws a heat map of the results obtained with normality tests.
     
     Parameters
     ----------
-    axes : ``matplotlib.axes.SubplotBase``
-        The axes to plot    
-    df : ``pandas.dataframe``
-        A dataframe with at least three columns containing the adopted significance level, the sample size and the result of at least one test. Columns with results must contain only ``bool`` values.
-    n_samples : ``int``
-        The number of sets used in the tests
-    alpha_column_name : ``str`` (optional)
-        The name of the column containing the significance levels adopted for each execution. If ``None``, the name of the first column of the ``df`` is assigned to this parameter.
-    n_rep_name : ``str`` (optional)
-        The name of the column containing the size of the sample used for each execution. If ``None``, the name of the second column of the ``df`` is assigned to this parameter.   
-    tests_column_names : ``list`` of ``str`` (optional)
-        A ``list`` containing the names of the columns with the results of each test. If ``None``, the names of all columns in the ``df`` are assigned to this parameter, with the exception of the first two columns
-    normal : ``bool`` (optional)
-        Whether to consider the data truly coming from the Normal distribution (``True``, default) or not (``False``). 
-        * If ``True``, columns containing test results will have ``True`` values replaced by ``1`` and ``False`` values replaced by ``0``;
-        * If ``False``, columns containing test results will have ``True`` values replaced by ``0`` and ``False`` values replaced by ``1``;
-    safe : ``bool`` (optional)
-        Whether to check the inputs before performing the calculations (``True``) or not (``False``, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).
+    axes : matplotlib.axes.SubplotBase
+        The axes to plot.    
+    df : :doc:`DataFrame <pandas:reference/api/pandas.DataFrame>`
+        A dataframe with at least three columns containing the adopted significance level, the sample size and the result of at least one test. Columns with results must contain only *bool* values.
+    n_samples : int
+        The number of sets used in the tests.
+    alpha_column_name : str, optional
+        The name of the column containing the significance levels adopted for each execution. If *None*, the name of the first column of the *df* is assigned to this parameter.
+    n_rep_name : str, optional
+        The name of the column containing the size of the sample used for each execution. If *None*, the name of the second column of the *df* is assigned to this parameter.   
+    tests_column_names : list of str, optional
+        A *list* containing the names of the columns with the results of each test. If *None*, the names of all columns in the *df* are assigned to this parameter, with the exception of the first two columns.
+    normal : bool, optional
+        Whether to consider the data truly coming from the Normal distribution (*True*, default) or not (*False*). 
+
+        * If *True*, columns containing test results will have *True* values replaced by ``1`` and *False* values replaced by ``0``
+        * If ``False``, columns containing test results will have ``True`` values replaced by ``0`` and *False* values replaced by ``1``;
+
+    safe : bool, optional
+        Whether to check the inputs before performing the calculations (*True*) or not (*False*, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).
 
     Returns
     -------        
-    axes : ``matplotlib.axes._subplots.AxesSubplot``
+    axes : matplotlib.axes.SubplotBase
         The axis of the graph.
-    df : ``pandas.DataFrame``
-        The modified ``df`` with the estimated probabilities for the tests used to draw the heatmap        
+    df : :doc:`DataFrame <pandas:reference/api/pandas.DataFrame>`
+        The modified *df* with the estimated probabilities for the tests used to draw the heatmap.        
 
     Notes
     -----
-    If ``alpha_column_name`` or ``n_rep_name`` or ``tests_column_names`` are None, they are all interpreted as ``None``.
+    If *alpha_column_name* or *n_rep_name* or *tests_column_names* are *None*, they are all interpreted as *None*.
 
 
-        
     See Also
-    --------            
+    --------  
+    normal_distribution_plot
+
+    Examples
+    --------
+    >>> from normtest import normtest
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> import pandas as pd
+
+    Preparing the data
+
+    >>> n_samples = 10
+    >>> seeds = np.arange(1, n_samples+1)
+    >>> rng = np.random.default_rng(42)
+    >>> rng.shuffle(seeds)
+    >>> n_rep = np.arange(4,31)
+    >>> alphas = [0.1, 0.05, 0.01]
+    >>> seed_values = []
+    >>> alpha_list = []
+    >>> blom_1 = []
+    >>> blom_2 = []
+    >>> blom_3 = []
+    >>> n_rep_list = []
+
+    Applying normality tests
+
+    >>> for seed in seeds:
+    >>>     rng = np.random.default_rng(seed=seed)
+    >>>     normal_data = rng.normal(loc=0, scale=1.0, size=max(n_rep))
+    >>>     for n in n_rep:
+    >>>         for alpha in alphas:
+    >>>             n_rep_list.append(n)
+    >>>             seed_values.append(seed)
+    >>>             if alpha == 0.1:
+    >>>                 alpha_list.append("0.10")
+    >>>             elif alpha == 0.05:
+    >>>                 alpha_list.append("0.05")
+    >>>             else:
+    >>>                 alpha_list.append("0.01")
+    >>>             result = normtest.ryan_joiner(x_data=normal_data[:n], method="blom", alpha=alpha)
+    >>>             if result.statistic < result.critical:
+    >>>                 blom_1.append(False)
+    >>>             else:
+    >>>                 blom_1.append(True)
+    >>>             result = normtest.ryan_joiner(x_data=normal_data[:n], method="blom2", alpha=alpha)
+    >>>             if result.statistic < result.critical:
+    >>>                 blom_2.append(False)            
+    >>>             else:
+    >>>                 blom_2.append(True)                
+    >>>             result = normtest.ryan_joiner(x_data=normal_data[:n], method="blom3", alpha=alpha)
+    >>>             if result.statistic < result.critical:
+    >>>                 blom_3.append(False)
+    >>>             else:
+    >>>                 blom_3.append(True)                                
+            
+    Creating the input dataframe
+
+    >>> df_data = pd.DataFrame({
+    >>>     "Alpha": alpha_list,
+    >>>     "n amostral": n_rep_list,
+    >>>     "blom": blom_1,
+    >>>     "blom2": blom_2,
+    >>>     "blom3": blom_3,       
+    >>> })
+    
+    Generating the heat graph
+
+    >>> fig, ax = plt.subplots(figsize=(16,4))
+    >>> ax, df = normtest.make_heatmap(axes=ax, df=df_data, n_samples=n_samples)
+    >>> fig.tight_layout()
+    >>> # plt.savefig("heatmap.png", bbox_inches='tight')
+    >>> plt.show()
+    
+    .. image:: img/heatmap.png
+        :alt: Heat map for Ryan-Joiner test and its variants
+        :align: center  
+
+
     """
 
     if alpha_column_name is None or n_rep_name is None or tests_column_names is None:
@@ -606,39 +727,57 @@ def make_heatmap(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, t
 
 # com alguns testes
 def normal_distribution_plot(axes, n_rep, seed=None, xinfo=[0.00001, 0.99999, 1000], loc=0.0, scale=1.0, safe=False):
-    """This function draws a normal distribution chart with the experimental points and the distribution histogram
+    """This function draws a normal distribution chart with the experimental points and the distribution histogram.
 
     Parameters
     ----------
-    axes : ``matplotlib.axes.SubplotBase``
-        The axes to plot    
-    n_rep : ``int`` (positive)
-        The number of samples in the dataset (must be greater than 3)
-    seed : ``int`` (optional)
-        The seed used to obtain random data from the Normal distribution. The default value is ``None`` which results in a random seed
-    xinfo : ``list`` (optional)
+    axes : matplotlib.axes.SubplotBase
+        The axes to plot.
+    n_rep : int (positive)
+        The number of samples in the dataset (must be greater than ``3``).
+    seed : int, optional
+        The seed used to obtain random data from the Normal distribution. The default value is *None* which results in a random seed.
+    xinfo : list, optional
         A list with three elements:
-        * ``xinfo[0]`` the smallest value used as Percent point (positive, default is ``10-6``);
-        * ``xinfo[1]`` the highest value used as Percent point (positive, default is ``1-10-6``);;
-        * ``xinfo[2]`` the number of equally spaced points that are generated to estimate the Normal distribution (positive, default is ``1000``);;
-    loc : ``float`` or ``int`` (optional)
-        The loc parameter of the Normal distribution (default is ``0.0``)
-    scale : ``float`` or ``int`` (optional)
-        The scale parameter of the Normal distribution (positive, default is ``1.0``)
-    safe : ``bool`` (optional)
-        Whether to check the inputs before performing the calculations (``True``) or not (``False``, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).
+
+        * *xinfo[0]* the smallest value used as Percent point (positive, default is ``10-6``);
+        * *xinfo[1]* the highest value used as Percent point (positive, default is ``1-10-6``);
+        * *xinfo[2]* the number of equally spaced points that are generated to estimate the Normal distribution (positive, default is ``1000``);
+
+    loc : float or int, optional
+        The loc parameter of the Normal distribution (default is ``0.0``).
+    scale : float or int, optional
+        The scale parameter of the Normal distribution (positive, default is ``1.0``).
+    safe : bool, optional
+        Whether to check the inputs before performing the calculations (*True*) or not (*False*, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).
 
     Returns
     -------        
-    axes : ``matplotlib.axes._subplots.AxesSubplot``
+    axes : matplotlib.axes.SubplotBase
         The axis of the graph.
 
     See Also
-    --------        
+    --------  
+    make_heatmap
+
+    Notes
+    -----
+    Random Normal data is sampled using :doc:`np.random.default_rng().normal() <numpy:reference/random/generated/numpy.random.Generator.normal>`.
     
     
     Examples
     --------
+    >>> from normtest import normtest
+    >>> import matplotlib.pyplot as plt
+    >>> fig, ax = plt.subplots(figsize=(6,4))
+    >>> ax = normtest.normal_distribution_plot(ax, n_rep=30, seed=42)
+    >>> # plt.savefig("normal_dist.png")
+    >>> plt.show()
+
+    .. image:: img/normal_dist.png
+        :alt: Graph showing the Standard Normal distribution
+        :align: center    
+
         
     """
     
@@ -679,18 +818,18 @@ def normal_distribution_plot(axes, n_rep, seed=None, xinfo=[0.00001, 0.99999, 10
 
 
 
-# falta teste para o filliben
+# falta teste para o filliben, com documentação
 def ordered_statistics(n, method, safe=False):
     """This function estimates the statistical order (:math:`m_{i}`) using some approximations
     
     Parameters
     ----------
-    n : ``int``
+    n : int
         The sample size. Must be greater than ``3``;
-    method : ``str``
-        A string with the approximation method that should be adopted. The options are ``"blom"``, ``"blom2"``, ``"blom3"`` or ``"filliben"``. See more details in the Notes section.
-    safe : ``bool`` (optional)
-        Whether to check the inputs before performing the calculations (``True``) or not (``False``, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).                             
+    method : str, optional
+        A string with the approximation method that should be adopted. The options are *"blom"*, *"blom2"*, *"blom3"* or *"filliben"*. See more details in the Notes section.
+    safe : bool, optional
+        Whether to check the inputs before performing the calculations (*True*) or not (*False*, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).                             
         
     Returns
     -------        
@@ -730,7 +869,7 @@ def ordered_statistics(n, method, safe=False):
             
     where :math:`n` is the sample size and :math:`i` is the ith observation.
 
-    In the implementations of the Ryan-Joiner test in Minitab and Statext software, the bloom method is used, which is cited by [2]_ as an alternative
+    In the implementations of the Ryan-Joiner test in Minitab and Statext software, the bloom method is used, which is cited by [2]_ as an alternative.
 
     References
     ----------
@@ -745,8 +884,8 @@ def ordered_statistics(n, method, safe=False):
 
     Examples
     --------
-    >>> from normtest import normtest as nm
-    >>> result = nm.ordered_statistics(7, method="blom") 
+    >>> from normtest import normtest
+    >>> result = normtest.ordered_statistics(7, method="blom") 
     >>> print(result)
     [0.0862069  0.22413793 0.36206897 0.5        0.63793103 0.77586207
     0.9137931 ]
