@@ -935,6 +935,97 @@ def make_heatmap(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, t
 
 
 
+def skew_kurtosis_plot(axes, df, test_column_name=None, skewness_column_name=None, kurtosis_column_name=None, reverse=True, palette_color="red", marker_size=50, safe=False):
+    """This funtion is just a wrap arounf sns.scatterplot to plot skew x kurtosis.
+
+
+    Parameters
+    ----------
+    axes : matplotlib.axes.SubplotBase
+        The axes to plot.    
+    df : :doc:`DataFrame <pandas:reference/api/pandas.DataFrame>`
+        A dataframe with at least three columns containing the test result, the skewness and the kurtosis for each dataset.
+    test_column_name : str, optional
+        The name of the column containing the test result as percentage. If *None*, the name of the first column of the *df* is assigned to this parameter.        
+    skewness_column_name : str, optional
+        The name of the column containing the skewness. If *None*, the name of the second column of the *df* is assigned to this parameter.
+    kurtosis_column_name : str, optional
+        The name of the column containing the kurtosis. If *None*, the name of the third column of the *df* is assigned to this parameter.
+    reverse : bool optional
+        Whether the color palette should be used in reverse (*True*, default) or not (*False*).
+    palette_color : str, optional
+        The color of the scatter plot points (default is *"red"*)
+    marker_size : float or int, optional
+        The size of the marker (default is `50`)
+    safe : bool, optional
+        Whether to check the inputs before performing the calculations (*True*) or not (*False*, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).
+
+    Returns
+    -------        
+    axes : matplotlib.axes.SubplotBase
+        The axis of the graph.
+
+
+    Notes
+    -----
+    If *alpha_column_name* or *n_rep_name* or *tests_column_names* are *None*, they are all interpreted as *None*.
+
+
+    See Also
+    --------  
+    normal_distribution_plot    
+
+    Examples
+    --------
+
+
+    """
+
+    if skewness_column_name is None or kurtosis_column_name is None or test_column_name is None:
+        test_column_name = df.columns[0]
+        skewness_column_name = df.columns[1]
+        kurtosis_column_name = df.columns[2]    
+    else:
+        if safe:
+            checkers._check_is_subplots(axes, "axes")
+            checkers._check_is_data_frame(df, "df")
+            if df.shape[0] < 3:
+                try:
+                    raise ValueError("Missing columns error")
+                except ValueError:
+                    print(f"\n\nThe data frame 'df' must contain at least 3 columns, but it only contains {df.shape[0]}.\n\n")
+                    raise            
+            checkers._check_is_str(skewness_column_name, "skewness_column_name")
+            checkers._check_is_str(kurtosis_column_name, "kurtosis_column_name")
+            checkers._check_is_str(test_column_name, "test_column_name")
+            checkers._check_is_str(palette_color, "palette_color")
+            checkers._check_is_float_or_int(marker_size, "marker_size")
+            checkers._check_is_positive(marker_size, "marker_size")
+            checkers._check_is_bool(reverse, "reverse")
+
+            
+    constants.warning_plot()
+    
+    df = df.copy()
+
+    # getting the color map
+    cmap = sns.light_palette(palette_color, as_cmap=True, reverse=reverse, )
+    # plotiing
+    axes = sns.scatterplot(df, x=skewness_column_name, y=kurtosis_column_name, hue=test_column_name, 
+                           palette=cmap, s=marker_size, ax=axes, hue_norm=(0, 100), legend=False,)
+    # making the x-axis proportional
+    xmin, xmax = axes.get_xlim()
+    xx_max = np.max(np.abs([xmin, xmax]))
+    axes.set_xlim(xx_max*xmin/np.abs(xmin), xx_max*xmax/np.abs(xmax))    
+
+    # adding legend colobar
+    norm = plt.Normalize(0, 100)
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+    sm.set_array([])
+    cax = axes.figure.add_axes([axes.get_position().x1+0.025, axes.get_position().y0, 0.06, axes.get_position().height])
+    axes.figure.colorbar(sm, cax=cax)    
+
+    return axes
 
 
 # com alguns testes
