@@ -522,23 +522,23 @@ def ryan_joiner(x_data, alpha=0.05, method="blom", weighted=False, safe=False):
 ## GENERIC FUNCTIONS ##
 
 # com alguns testes
-def make_bar_plot(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, tests_column_names=None, normal=True, safe=False):
+def make_bar_plot(axes, data_frame, n_samples, alpha_column_name=None, n_rep_name=None, tests_column_names=None, normal=True, safe=False):
     """This function draws a bar plot with the results obtained with normality tests.
 
     Parameters
     ----------
     axes : matplotlib.axes.SubplotBase
         The axes to plot.    
-    df : :doc:`DataFrame <pandas:reference/api/pandas.DataFrame>`
+    data_frame : :doc:`DataFrame <pandas:reference/api/pandas.DataFrame>`
         A dataframe with at least three columns containing the adopted significance level, the sample size and the result of at least one test. Columns with results must contain only *bool* values.
     n_samples : int
         The number of sets used in the tests.
     alpha_column_name : str, optional
-        The name of the column containing the significance levels adopted for each execution. If *None*, the name of the first column of the *df* is assigned to this parameter.
+        The name of the column containing the significance levels adopted for each execution. If *None*, the name of the first column of the *data_frame* is assigned to this parameter.
     n_rep_name : str, optional
-        The name of the column containing the size of the sample used for each execution. If *None*, the name of the second column of the *df* is assigned to this parameter.   
+        The name of the column containing the size of the sample used for each execution. If *None*, the name of the second column of the *data_frame* is assigned to this parameter.   
     tests_column_names : list of str, optional
-        A *list* containing the names of the columns with the results of each test. If *None*, the names of all columns in the *df* are assigned to this parameter, with the exception of the first two columns.
+        A *list* containing the names of the columns with the results of each test. If *None*, the names of all columns in the *data_frame* are assigned to this parameter, with the exception of the first two columns.
     normal : bool, optional
         Whether to consider the data truly coming from the Normal distribution (*True*, default) or not (*False*). 
 
@@ -641,20 +641,18 @@ def make_bar_plot(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, 
 
 
     """    
-    if alpha_column_name is None or n_rep_name is None or tests_column_names is None:
-        alpha_column_name = df.columns[0]
-        n_rep_name = df.columns[1]
-        tests_column_names = df.columns[2:]
-    else:
-        if safe:
-            checkers._check_is_subplots(axes, "axes")
-            checkers._check_is_data_frame(df, "df")
-            if df.shape[0] < 3:
-                try:
-                    raise ValueError("Missing columns error")
-                except ValueError:
-                    print(f"\n\nThe data frame 'df' must contain at least 3 columns, but it only contains {df.shape[0]}.\n\n")
-                    raise            
+
+    if safe:
+        checkers._check_is_subplots(axes, "axes")
+        checkers._check_is_data_frame(data_frame, "data_frame")
+        checkers._check_is_bool(normal, "normal")
+        if df.shape[0] < 3:
+            try:
+                raise ValueError("Missing columns error")
+            except ValueError:
+                print(f"\n\nThe data frame 'data_frame' must contain at least 3 columns, but it only contains {data_frame.shape[0]}.\n\n")
+                raise  
+        if not (alpha_column_name is None or n_rep_name is None or tests_column_names is None):          
             checkers._check_is_integer(n_samples, "n_samples")
             checkers._check_value_is_equal_or_higher_than(n_samples, "n_samples", 2)
             checkers._check_is_str(alpha_column_name, "alpha_column_name")
@@ -662,7 +660,7 @@ def make_bar_plot(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, 
             checkers._check_is_list(tests_column_names, "tests_column_names")
             for i in range(len(tests_column_names)):
                 checkers._check_is_str(tests_column_names[i], f"tests_column_names[{i}]")
-            checkers._check_is_bool(normal, "normal")
+            
             for test in (tests_column_names):
                 if df[tests_column_names].dtype != bool:
                     try:
@@ -670,9 +668,16 @@ def make_bar_plot(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, 
                     except ValueError:
                         print(f"\n\nThe Column '{test}' must contain only boolean values.\n\n")
                         raise
+
+    if alpha_column_name is None or n_rep_name is None or tests_column_names is None:
+        alpha_column_name = data_frame.columns[0]
+        n_rep_name = data_frame.columns[1]
+        tests_column_names = data_frame.columns[2:]
+
+
     
     constants.warning_plot()
-    df = df.copy()
+    df = data_frame.copy()
 
     if normal:
         true = 1
@@ -731,23 +736,23 @@ def make_bar_plot(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, 
 
 
 # com alguns testes
-def make_heatmap(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, tests_column_names=None, normal=True, safe=False):
+def make_heatmap(axes, data_frame, n_samples, alpha_column_name=None, n_rep_name=None, tests_column_names=None, normal=True, safe=False):
     """This function draws a heat map of the results obtained with normality tests.
     
     Parameters
     ----------
     axes : matplotlib.axes.SubplotBase
         The axes to plot.    
-    df : :doc:`DataFrame <pandas:reference/api/pandas.DataFrame>`
+    data_frame : :doc:`DataFrame <pandas:reference/api/pandas.DataFrame>`
         A dataframe with at least three columns containing the adopted significance level, the sample size and the result of at least one test. Columns with results must contain only *bool* values.
     n_samples : int
         The number of sets used in the tests.
     alpha_column_name : str, optional
-        The name of the column containing the significance levels adopted for each execution. If *None*, the name of the first column of the *df* is assigned to this parameter.
+        The name of the column containing the significance levels adopted for each execution. If *None*, the name of the first column of the *data_frame* is assigned to this parameter.
     n_rep_name : str, optional
-        The name of the column containing the size of the sample used for each execution. If *None*, the name of the second column of the *df* is assigned to this parameter.   
+        The name of the column containing the size of the sample used for each execution. If *None*, the name of the second column of the *data_frame* is assigned to this parameter.   
     tests_column_names : list of str, optional
-        A *list* containing the names of the columns with the results of each test. If *None*, the names of all columns in the *df* are assigned to this parameter, with the exception of the first two columns.
+        A *list* containing the names of the columns with the results of each test. If *None*, the names of all columns in the *data_frame* are assigned to this parameter, with the exception of the first two columns.
     normal : bool, optional
         Whether to consider the data truly coming from the Normal distribution (*True*, default) or not (*False*). 
 
@@ -762,7 +767,7 @@ def make_heatmap(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, t
     axes : matplotlib.axes.SubplotBase
         The axis of the graph.
     df : :doc:`DataFrame <pandas:reference/api/pandas.DataFrame>`
-        The modified *df* with the estimated probabilities for the tests used to draw the heatmap.        
+        The modified *data_frame* with the estimated probabilities for the tests used to draw the heatmap.        
 
     Notes
     -----
@@ -851,20 +856,17 @@ def make_heatmap(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, t
 
     """
 
-    if alpha_column_name is None or n_rep_name is None or tests_column_names is None:
-        alpha_column_name = df.columns[0]
-        n_rep_name = df.columns[1]
-        tests_column_names = df.columns[2:]
-    else:
-        if safe:
-            checkers._check_is_subplots(axes, "axes")
-            checkers._check_is_data_frame(df, "df")
-            if df.shape[0] < 3:
-                try:
-                    raise ValueError("Missing columns error")
-                except ValueError:
-                    print(f"\n\nThe data frame 'df' must contain at least 3 columns, but it only contains {df.shape[0]}.\n\n")
-                    raise            
+    if safe:
+        checkers._check_is_subplots(axes, "axes")
+        checkers._check_is_data_frame(data_frame, "data_frame")
+        checkers._check_is_bool(normal, "normal")
+        if data_frame.shape[0] < 3:
+            try:
+                raise ValueError("Missing columns error")
+            except ValueError:
+                print(f"\n\nThe data frame 'data_frame' must contain at least 3 columns, but it only contains {data_frame.shape[0]}.\n\n")
+                raise  
+        if not (alpha_column_name is None or n_rep_name is None or tests_column_names is None):          
             checkers._check_is_integer(n_samples, "n_samples")
             checkers._check_value_is_equal_or_higher_than(n_samples, "n_samples", 2)
             checkers._check_is_str(alpha_column_name, "alpha_column_name")
@@ -872,16 +874,25 @@ def make_heatmap(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, t
             checkers._check_is_list(tests_column_names, "tests_column_names")
             for i in range(len(tests_column_names)):
                 checkers._check_is_str(tests_column_names[i], f"tests_column_names[{i}]")
-            checkers._check_is_bool(normal, "normal")
+            
+            
             for test in (tests_column_names):
                 if df[tests_column_names].dtype != bool:
                     try:
                         raise ValueError("Not boolean error")
                     except ValueError:
-                        print(f"\n\nThe Column '{test}' must contain only boolean values.\n\n")
+                        print(f"\n\nThe column '{test}' must contain only boolean values.\n\n")
                         raise
+
+
+    if alpha_column_name is None or n_rep_name is None or tests_column_names is None:
+        alpha_column_name = data_frame.columns[0]
+        n_rep_name = data_frame.columns[1]
+        tests_column_names = data_frame.columns[2:]
+
+
     constants.warning_plot()
-    df = df.copy()
+    df = data_frame.copy()
     if normal:
         true = 1
         false = 0
