@@ -935,8 +935,101 @@ def make_heatmap(axes, df, n_samples, alpha_column_name=None, n_rep_name=None, t
 
 
 
+def make_skew_kurtosis_plot(axes, data_frame, n_rep_column_name=None, id_column_name=None, skewness_column_name=None, kurtosis_column_name=None, test_column_name=None, normal=True, safe=False):
+    """This function prepares the data and generates an axis with the graph of skewness versus kurtosis
+
+    Parameters
+    ----------
+    axes : matplotlib.axes.SubplotBase
+        The axes to plot.    
+    data_frame : :doc:`DataFrame <pandas:reference/api/pandas.DataFrame>`
+        A dataframe with at least five (``5``) columns containing the number of repetitions, an identifier, the kurtosis, the skewness and the result of a normality test for each dataset.
+    n_rep_column_name : str, optional
+        The name of the column containing the sample size of each analysis. If *None*, the name of the first column of the *data_frame* is assigned to this parameter.                
+    id_column_name : str, optional
+        The name of the column containing an id (usually the seed used to generate the data) of each data set. If *None*, the name of the second column of the *data_frame* is assigned to this parameter.                        
+    skewness_column_name : str, optional
+        The name of the column containing the skewness for each dataset. If *None*, the name of the third column of the *data_frame* is assigned to this parameter.
+    kurtosis_column_name : str, optional
+        The name of the column containing the kurtosis. If *None*, the name of the fourth column of the *data_frame* is assigned to this parameter.
+    test_column_name : str, optional
+        The name of the column containing the test result as *bool*. If *None*, the name of the fifth column of the *data_frame* is assigned to this parameter.        
+    normal : bool, optional
+        Whether to consider the data truly coming from the Normal distribution (*True*, default) or not (*False*). 
+
+        * If *True*, columns containing test results will have *True* values replaced by ``1`` and *False* values replaced by ``0``
+        * If ``False``, columns containing test results will have ``True`` values replaced by ``0`` and *False* values replaced by ``1``;
+
+    safe : bool, optional
+        Whether to check the inputs before performing the calculations (*True*) or not (*False*, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).
+
+    Returns
+    -------        
+    axes : matplotlib.axes.SubplotBase
+        The axis of the graph.
+    df : :doc:`DataFrame <pandas:reference/api/pandas.DataFrame>`
+        The modified dataframe
+
+    Notes
+    -----
+    If *n_rep_column_name* or *id_column_name* or *kurtosis_column_name* or *skewness_column_name* or *test_column_name* are *None*, they are all interpreted as *None*.
+
+ 
+
+    See Also
+    --------  
+    skew_kurtosis_plot    
+
+    Examples
+    --------
+
+    """
+
+    if safe:
+        checkers._check_is_subplots(axes, "axes")
+        checkers._check_is_data_frame(data_frame, "data_frame")
+        if data_frame.shape[0] < 5:
+            try:
+                raise ValueError("Missing columns error")
+            except ValueError:
+                print(f"\n\nThe data frame 'data_frame' must contain at least 5 columns, but it only contains {data_frame.shape[0]}.\n\n")
+                raise            
+        if not (n_rep_column_name is None or id_column_name is None or kurtosis_column_name is None or skewness_column_name is None or test_column_name is None):
+            checkers._check_is_str(n_rep_column_name, "n_rep_column_name")
+            checkers._check_is_str(id_column_name, "id_column_name")
+            checkers._check_is_str(kurtosis_column_name, "kurtosis_column_name")
+            checkers._check_is_str(skewness_column_name, "skewness_column_name")
+            checkers._check_is_str(test_column_name, "test_column_name")
+        
+        checkers._check_is_bool(normal, "normal")    
+
+    if n_rep_column_name is None or id_column_name is None or kurtosis_column_name is None or skewness_column_name is None or test_column_name is None:
+        n_rep_column_name = data_frame.columns[0]
+        id_column_name = data_frame.columns[1]
+        kurtosis_column_name = data_frame.columns[2]  
+        skewness_column_name = data_frame.columns[3]  
+        test_column_name = data_frame.columns[4]   
+
+    df = data_frame.copy()
+    n_rep = df[n_rep_column_name].unique().size
+
+    if normal:
+        true = 1
+        false = 0
+    else:
+        true = 0
+        false = 1    
+    df[test_column_name] = df[test_column_name].replace({True: true, False: false})
+    df = df.groupby([id_column_name, kurtosis_column_name, skewness_column_name], as_index=False).agg({test_column_name: 'sum'})
+    df[test_column_name] = df[test_column_name]*100/(n_rep)
+
+    ax = skew_kurtosis_plot(axes=axes, df=df, test_column_name=test_column_name, skewness_column_name=skewness_column_name, kurtosis_column_name=kurtosis_column_name, reverse=normal, palette_color="red", marker_size=50, safe=safe)
+
+    return ax, df 
+
+
 def skew_kurtosis_plot(axes, df, test_column_name=None, skewness_column_name=None, kurtosis_column_name=None, reverse=True, palette_color="red", marker_size=50, safe=False):
-    """This funtion is just a wrap arounf sns.scatterplot to plot skew x kurtosis.
+    """This funtion is just a wrap around sns.scatterplot to plot skew x kurtosis.
 
 
     Parameters
