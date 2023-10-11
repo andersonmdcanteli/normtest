@@ -952,7 +952,7 @@ def make_heatmap(axes, data_frame, n_samples, alpha_column_name=None, n_rep_name
 
 
 
-def make_bar_plot(axes, data_frame, n_samples, n_rep_column_name=None, alpha_column_name=None, test_column_name=None, success=True, ref_lines=[], safe=False, ):
+def make_norm_bar_plot(axes, data_frame, n_samples, n_rep_column_name=None, alpha_column_name=None, test_column_name=None, success=True, ref_lines=[], safe=False, ):
     """This function draws bar graph for a Normality test
 
     Parameters
