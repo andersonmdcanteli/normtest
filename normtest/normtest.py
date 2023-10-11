@@ -870,9 +870,9 @@ def make_heatmap(axes, data_frame, n_samples, alpha_column_name=None, n_rep_name
             except ValueError:
                 print(f"\n\nThe data frame 'data_frame' must contain at least 3 columns, but it only contains {data_frame.shape[0]}.\n\n")
                 raise  
+        checkers._check_is_integer(n_samples, "n_samples")
+        checkers._check_value_is_equal_or_higher_than(n_samples, "n_samples", 2)
         if not (alpha_column_name is None or n_rep_name is None or tests_column_names is None):          
-            checkers._check_is_integer(n_samples, "n_samples")
-            checkers._check_value_is_equal_or_higher_than(n_samples, "n_samples", 2)
             checkers._check_is_str(alpha_column_name, "alpha_column_name")
             checkers._check_is_str(n_rep_name, "n_rep_name")
             checkers._check_is_list(tests_column_names, "tests_column_names")
@@ -949,6 +949,123 @@ def make_heatmap(axes, data_frame, n_samples, alpha_column_name=None, n_rep_name
                      cbar_kws={"pad":0.02}
                      )
     return axes, df
+
+
+
+def make_bar_plot(axes, data_frame, n_samples, n_rep_column_name=None, alpha_column_name=None, test_column_name=None, success=True, ref_lines=[], safe=False, ):
+    """This function draws bar graph for a Normality test
+
+    Parameters
+    ----------
+    axes : matplotlib.axes.SubplotBase
+        The axes to plot.    
+    data_frame : :doc:`DataFrame <pandas:reference/api/pandas.DataFrame>`
+        A *DataFrame* with at least three (``3``) columns containing the sample size, the significance level adopted and the test result for each analysis
+    n_samples : int
+        The number of sets used in the tests.
+    n_rep_name : str, optional
+        The name of the column containing the size of the sample used for each test. If *None*, the name of the first column of the *data_frame* is assigned to this parameter.   
+    alpha_column_name : str, optional
+        The name of the column containing the significance levels adopted for each test. If *None*, the name of the second column of the *data_frame* is assigned to this parameter.
+    test_column_name : str, optional
+        The name of the column containing the test result as *bool*. If *None*, the name of the third column of the *data_frame* is assigned to this parameter. 
+    success : bool, optional                
+        Whether to treat the True result as a success (*True*, default) or as an error (*False*)
+    ref_lines : list, optional
+        A list of numbers used as a reference line on the graph. By default the list is empty.
+    safe : bool, optional
+        Whether to check the inputs before performing the calculations (*True*) or not (*False*, default). Useful for beginners to identify problems in data entry (may reduce algorithm execution time).
+
+    Returns
+    -------        
+    axes : matplotlib.axes.SubplotBase
+        The axis of the graph.
+    df : :doc:`DataFrame <pandas:reference/api/pandas.DataFrame>`
+        The modified dataframe
+
+    Notes
+    -----
+    If *n_rep_column_name* or *alpha_column_name* or *test_column_name* are *None*, they are all interpreted as *None*.
+
+
+    See Also
+    --------  
+    normal_distribution_plot    
+
+    Examples
+    --------
+    
+    """
+
+
+    if safe:
+        checkers._check_is_subplots(axes, "axes")
+        checkers._check_is_data_frame(data_frame, "data_frame")
+        checkers._check_is_bool(success, "success")
+        if data_frame.shape[0] < 3:
+            try:
+                raise ValueError("Missing columns error")
+            except ValueError:
+                print(f"\n\nThe data frame 'data_frame' must contain at least 3 columns, but it only contains {data_frame.shape[0]}.\n\n")
+                raise  
+        checkers._check_is_integer(n_samples, "n_samples")
+        checkers._check_value_is_equal_or_higher_than(n_samples, "n_samples", 2)
+        if not (n_rep_column_name is None or alpha_column_name is None or test_column_name is None):          
+            checkers._check_is_str(n_rep_column_name, "n_rep_column_name")
+            checkers._check_is_str(alpha_column_name, "alpha_column_name")
+            checkers._check_is_str(test_column_name, "test_column_name")
+    
+            if data_frame[test_column_name].dtype != bool:
+                try:
+                    raise ValueError("Not boolean error")
+                except ValueError:
+                    print(f"\n\nThe column '{test_column_name}' must contain only boolean values.\n\n")
+                    raise
+        checkers._check_is_list(ref_lines, "ref_lines")
+        for i in range(len(ref_lines)):
+            checkers._check_is_float_or_int(ref_lines[i], f"{ref_lines[i]}")                            
+
+    if alpha_column_name is None or n_rep_column_name is None or test_column_name is None:
+        alpha_column_name = data_frame.columns[0]
+        n_rep_name = data_frame.columns[1]
+        test_column_name = data_frame.columns[2]    
+
+    constants.warning_plot()
+    # filtering only the columns requeried    
+    df = data_frame[[alpha_column_name, n_rep_column_name, test_column_name]].copy()
+    
+    if success:
+        true = 1
+        false = 0
+        ylabel = "Success ($\%$)"
+    else:
+        true = 0
+        false = 1
+        ylabel = "Failure ($\%$)"
+
+
+    # preparing the data
+    df[test_column_name] = df[test_column_name].replace({True: true, False: false})
+    df_agg = df.groupby([n_rep_column_name, alpha_column_name]).agg("sum")
+    df_agg = df_agg*100/n_samples
+    df_agg = df_agg.reset_index()
+
+    # ploting
+    axes = sns.barplot(df_agg, x=n_rep_column_name, y=test_column_name, hue=alpha_column_name, ax=axes, palette="pastel")
+    sns.move_legend(axes, "upper left", bbox_to_anchor=(1, 1))
+    # removing legend if there is only one Alpha
+    if df[alpha_column_name].unique().size == 1:
+        axes.get_legend().set_visible(False)
+
+    # adding reference lines
+    trans = axes.get_yaxis_transform()
+    for line in ref_lines:
+        axes.axhline(y=line, color="gray", ls="--")
+        plt.text(.05, line*1.01, f'{line}%', transform=trans)
+    axes.set_xlabel("Sample size")
+    axes.set_ylabel(ylabel)
+    return axes, df_agg
+
 
 
 
@@ -1031,7 +1148,7 @@ def make_skew_kurtosis_plot(axes, data_frame, n_rep_column_name=None, id_column_
         kurtosis_column_name = data_frame.columns[4]  
         test_column_name = data_frame.columns[5]   
 
-    df = data_frame.copy()
+    df = data_frame.copy() # <---------------------------------------------------------- precisa ser filtrado melhor
     n_rep = df[n_rep_column_name].unique().size
     n_alphas = df[alpha_column_name].unique().size
 
