@@ -662,7 +662,7 @@ def make_bar_plot(axes, data_frame, n_samples, alpha_column_name=None, n_rep_nam
                 checkers._check_is_str(tests_column_names[i], f"tests_column_names[{i}]")
             
             for test in (tests_column_names):
-                if df[tests_column_names].dtype != bool:
+                if data_frame[test].dtype != bool:
                     try:
                         raise ValueError("Not boolean error")
                     except ValueError:
@@ -673,11 +673,16 @@ def make_bar_plot(axes, data_frame, n_samples, alpha_column_name=None, n_rep_nam
         alpha_column_name = data_frame.columns[0]
         n_rep_name = data_frame.columns[1]
         tests_column_names = data_frame.columns[2:]
+        print("ok")
 
 
     
     constants.warning_plot()
-    df = data_frame.copy()
+
+    # filtering only the columns requeried
+    columns = [alpha_column_name, n_rep_name]
+    columns.extend(tests_column_names)
+    df = data_frame[columns].copy()
 
     if normal:
         true = 1
@@ -720,9 +725,8 @@ def make_bar_plot(axes, data_frame, n_samples, alpha_column_name=None, n_rep_nam
     df = df.mean().to_frame(name="Percentages")
     df["Tests"] = df.index
     df = df.reset_index(drop=True)
-    alphas = np.repeat(alphas, len(dfs),)
 
-    df["Alpha"] = alphas
+    df["Alpha"] = np.repeat(alphas, len(tests_column_names),)
 
     sns.barplot(data = df, x="Tests", y="Percentages", hue="Alpha", ax=axes)
     for container in axes.containers:
@@ -877,7 +881,7 @@ def make_heatmap(axes, data_frame, n_samples, alpha_column_name=None, n_rep_name
             
             
             for test in (tests_column_names):
-                if df[tests_column_names].dtype != bool:
+                if data_frame[test].dtype != bool:
                     try:
                         raise ValueError("Not boolean error")
                     except ValueError:
@@ -890,9 +894,11 @@ def make_heatmap(axes, data_frame, n_samples, alpha_column_name=None, n_rep_name
         n_rep_name = data_frame.columns[1]
         tests_column_names = data_frame.columns[2:]
 
-
     constants.warning_plot()
-    df = data_frame.copy()
+    # filtering only the columns requeried
+    columns = [alpha_column_name, n_rep_name]
+    columns.extend(tests_column_names)
+    df = data_frame[columns].copy()
     if normal:
         true = 1
         false = 0
@@ -1039,7 +1045,7 @@ def make_skew_kurtosis_plot(axes, data_frame, n_rep_column_name=None, id_column_
     df = df.groupby([id_column_name, kurtosis_column_name, skewness_column_name], as_index=False).agg({test_column_name: 'sum'})
     df[test_column_name] = df[test_column_name]*100/(n_rep*n_alphas)
 
-    ax = skew_kurtosis_plot(axes=axes, df=df, test_column_name=test_column_name, skewness_column_name=skewness_column_name, kurtosis_column_name=kurtosis_column_name, reverse=True, palette_color="red", marker_size=50, safe=safe)
+    ax = skew_kurtosis_plot(axes=axes, data_frame=df, test_column_name=test_column_name, skewness_column_name=skewness_column_name, kurtosis_column_name=kurtosis_column_name, reverse=True, palette_color="red", marker_size=50, safe=safe)
 
     return ax, df 
 
